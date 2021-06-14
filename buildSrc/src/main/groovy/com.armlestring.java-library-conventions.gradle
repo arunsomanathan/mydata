@@ -1,0 +1,4 @@
+plugins {
+    id 'com.armlestring.java-common-conventions'
+    id 'java-library'
+}

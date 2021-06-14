@@ -1,0 +1,24 @@
+plugins {
+    id 'com.diffplug.spotless'
+    id 'pmd'
+    id "com.gorylenko.gradle-git-properties"
+}
+
+repositories {
+    mavenCentral()
+}
+
+spotless {
+    format 'misc', {
+        target '*.gradle', '*.md', '.gitignore'
+
+        trimTrailingWhitespace()
+        indentWithTabs()
+        endWithNewline()
+    }
+}
+
+pmd {
+    consoleOutput = true
+    ruleSets = ["$rootDir/pmd-rules.xml"]
+}
