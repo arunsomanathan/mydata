@@ -4,4 +4,4 @@ import java.math.BigDecimal;
 
 /** Account DTO */
 public record AccountDto(
-    String bankName, String branch, String accountNumber, BigDecimal balance) {}
+    Integer id, String bankName, String branch, String accountNumber, BigDecimal balance) {}

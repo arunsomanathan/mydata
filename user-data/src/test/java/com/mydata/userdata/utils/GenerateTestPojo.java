@@ -36,7 +36,11 @@ public final class GenerateTestPojo {
    */
   public static AccountDto getSingleAccountDto() {
     return new AccountDto(
-        getTestString(), getTestString(), getTestString(), new BigDecimal(Math.abs(getInt())));
+        getTestInt(),
+        getTestString(),
+        getTestString(),
+        getTestString(),
+        new BigDecimal(Math.abs(getTestInt())));
   }
 
   /**
@@ -53,7 +57,7 @@ public final class GenerateTestPojo {
    *
    * @return am integer
    */
-  private static Integer getInt() {
+  private static Integer getTestInt() {
     return id++;
   }
 
@@ -73,7 +77,8 @@ public final class GenerateTestPojo {
    * @return {@link MiscellaneousDto}
    */
   public static MiscellaneousDto getSingleMiscellaneousDto() {
-    return new MiscellaneousDto(getTestString(), new BigDecimal(Math.abs(getInt())));
+    return new MiscellaneousDto(
+        getTestInt(), getTestString(), new BigDecimal(Math.abs(getTestInt())));
   }
 
   /**
@@ -92,7 +97,8 @@ public final class GenerateTestPojo {
    * @return {@link MutualFundDto}
    */
   public static MutualFundDto getSingleMutualFundDto() {
-    return new MutualFundDto(getTestString(), getTestString(), getTestString(), getTestString());
+    return new MutualFundDto(
+        getTestInt(), getTestString(), getTestString(), getTestString(), getTestString());
   }
 
   /**
@@ -111,7 +117,8 @@ public final class GenerateTestPojo {
    * @return {@link StockDto}
    */
   public static StockDto getSingleStockDto() {
-    return new StockDto(getTestString(), getTestString(), getTestString(), getTestString());
+    return new StockDto(
+        getTestInt(), getTestString(), getTestString(), getTestString(), getTestString());
   }
 
   /**
@@ -131,11 +138,11 @@ public final class GenerateTestPojo {
    */
   public static DepositAccount getSingleDepositAccount() {
     return new DepositAccount(
-        getInt(),
+        getTestInt(),
         getTestString(),
         getTestString(),
         getTestString(),
-        new BigDecimal(Math.abs(getInt())),
+        new BigDecimal(Math.abs(getTestInt())),
         Instant.now(),
         Instant.now(),
         false);
@@ -177,11 +184,11 @@ public final class GenerateTestPojo {
    */
   public static Loan getSingleLoanAccount() {
     return new Loan(
-        getInt(),
+        getTestInt(),
         getTestString(),
         getTestString(),
         getTestString(),
-        new BigDecimal(Math.abs(getInt())),
+        new BigDecimal(Math.abs(getTestInt())),
         Instant.now(),
         Instant.now(),
         false);
@@ -204,11 +211,11 @@ public final class GenerateTestPojo {
    */
   public static SavingAccount getSingleSavingAccount() {
     return new SavingAccount(
-        getInt(),
+        getTestInt(),
         getTestString(),
         getTestString(),
         getTestString(),
-        new BigDecimal(Math.abs(getInt())),
+        new BigDecimal(Math.abs(getTestInt())),
         Instant.now(),
         Instant.now(),
         false);
@@ -231,9 +238,9 @@ public final class GenerateTestPojo {
    */
   public static Miscellaneous getSingleMiscellaneous() {
     return new Miscellaneous(
-        getInt(),
+        getTestInt(),
         getTestString(),
-        new BigDecimal(Math.abs(getInt())),
+        new BigDecimal(Math.abs(getTestInt())),
         Instant.now(),
         Instant.now(),
         false);
@@ -276,7 +283,7 @@ public final class GenerateTestPojo {
    */
   public static MutualFund getSingleMutualFund() {
     return new MutualFund(
-        getInt(),
+        getTestInt(),
         getTestString(),
         getTestString(),
         getTestString(),
@@ -323,7 +330,7 @@ public final class GenerateTestPojo {
    */
   public static Stock getSingleStock() {
     return new Stock(
-        getInt(),
+        getTestInt(),
         getTestString(),
         getTestString(),
         getTestString(),
