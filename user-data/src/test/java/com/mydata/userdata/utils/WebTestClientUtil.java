@@ -5,6 +5,7 @@ import static org.springframework.restdocs.webtestclient.WebTestClientRestDocume
 
 import java.util.List;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 /** Utility methods for WebTestClient */
 public final class WebTestClientUtil {
@@ -32,6 +33,42 @@ public final class WebTestClientUtil {
   public static WebTestClient.ResponseSpec get(
       final WebTestClient webTestClient, final String baseUrl, final String url) {
     return webTestClient.get().uri(concatUrl(baseUrl, url)).exchange();
+  }
+
+  /**
+   * Do a post request for the given url
+   *
+   * @param webTestClient the {@link WebTestClient}
+   * @param url the url
+   * @param reqObject the request Object
+   * @return the {@link WebTestClient.RequestHeadersSpec}
+   */
+  public static <R> WebTestClient.ResponseSpec post(
+      final WebTestClient webTestClient, final String url, final R reqObject) {
+    return post(webTestClient, "", url, reqObject);
+  }
+
+  /**
+   * Do a post request by concatenating base url and url
+   *
+   * @param webTestClient the {@link WebTestClient}
+   * @param baseUrl the base url for the request
+   * @param url the url for the request
+   * @param reqObject the request Object
+   * @return the {@link WebTestClient.RequestHeadersSpec}
+   */
+  public static <R> WebTestClient.ResponseSpec post(
+      final WebTestClient webTestClient,
+      final String baseUrl,
+      final String url,
+      final R reqObject) {
+    return webTestClient
+        .post()
+        .uri(concatUrl(baseUrl, url))
+        .accept(APPLICATION_JSON)
+        .contentType(APPLICATION_JSON)
+        .body(Mono.just(reqObject), reqObject.getClass())
+        .exchange();
   }
 
   /**
@@ -67,6 +104,31 @@ public final class WebTestClientUtil {
   }
 
   /**
+   * Generate the API Documentation
+   *
+   * @param listBodySpec the {@link WebTestClient.ListBodySpec}
+   * @param apiName the API name
+   * @param <E> the Object Type
+   * @return the {@link WebTestClient.ListBodySpec}
+   */
+  public static <E> WebTestClient.ListBodySpec<E> generateApiDoc(
+      final WebTestClient.ListBodySpec<E> listBodySpec, final String apiName) {
+    return listBodySpec.consumeWith(document(apiName));
+  }
+
+  /**
+   * Generate the API Documentation
+   *
+   * @param bodySpec the {@link WebTestClient.BodySpec}
+   * @param apiName the API name
+   * @return the {@link WebTestClient.BodySpec}
+   */
+  public static WebTestClient.BodySpec<?, ?> generateApiDoc(
+      final WebTestClient.BodySpec<?, ?> bodySpec, final String apiName) {
+    return bodySpec.consumeWith(document(apiName));
+  }
+
+  /**
    * Assert the body of response is equal to the given list and generated the API documentation.
    *
    * @param responseSpec the {@link WebTestClient.ResponseSpec}
@@ -85,19 +147,6 @@ public final class WebTestClientUtil {
   }
 
   /**
-   * Generate the API Documentation
-   *
-   * @param listBodySpec the {@link WebTestClient.ListBodySpec} //TODO this may need to be changed
-   * @param apiName the API name
-   * @param <E> the Object Type
-   * @return the {@link WebTestClient.ListBodySpec} //TODO this may need to be changed
-   */
-  public static <E> WebTestClient.ListBodySpec<E> generateApiDoc(
-      final WebTestClient.ListBodySpec<E> listBodySpec, final String apiName) {
-    return listBodySpec.consumeWith(document(apiName));
-  }
-
-  /**
    * Assert the body of response is equal to the given list
    *
    * @param responseSpec the {@link WebTestClient.ResponseSpec}
@@ -111,5 +160,37 @@ public final class WebTestClientUtil {
       final Class<E> objClass,
       final List<E> objList) {
     return responseSpec.expectBodyList(objClass).isEqualTo(objList);
+  }
+
+  /**
+   * Assert the body of response is equal to the given object and generated the API documentation.
+   *
+   * @param responseSpec the {@link WebTestClient.ResponseSpec}
+   * @param objClass the object Class
+   * @param respObj the object List
+   * @param apiName the API name
+   * @param <E> the Object type
+   * @return the {@link WebTestClient.BodySpec}
+   */
+  public static <E> WebTestClient.BodySpec<?, ?> assertBodyEquals(
+      final WebTestClient.ResponseSpec responseSpec,
+      final Class<E> objClass,
+      final E respObj,
+      final String apiName) {
+    return generateApiDoc(assertBodyEquals(responseSpec, objClass, respObj), apiName);
+  }
+
+  /**
+   * Assert the body of response is equal to the given list
+   *
+   * @param responseSpec the {@link WebTestClient.ResponseSpec}
+   * @param objClass the object Class
+   * @param respObj the object List
+   * @param <E> the Object Type
+   * @return the {@link WebTestClient.BodySpec}
+   */
+  public static <E> WebTestClient.BodySpec<E, ?> assertBodyEquals(
+      final WebTestClient.ResponseSpec responseSpec, final Class<E> objClass, final E respObj) {
+    return responseSpec.expectBody(objClass).isEqualTo(respObj);
   }
 }

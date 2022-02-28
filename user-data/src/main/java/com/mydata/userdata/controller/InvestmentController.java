@@ -10,9 +10,11 @@ import com.mydata.userdata.service.InvestmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * This class is the implementation rest controller exposing end points for collecting equity data
@@ -26,7 +28,7 @@ public class InvestmentController {
   private final InvestmentService investmentService;
 
   /**
-   * Method for Getting All Saving Accounts
+   * Method for Getting All Deposit Accounts
    *
    * @return {@link Flux<AccountDto>}
    */
@@ -40,6 +42,21 @@ public class InvestmentController {
   }
 
   /**
+   * Method for adding a Deposit Accounts
+   *
+   * @return {@link Mono<AccountDto>}
+   */
+  @PostMapping(
+      name = "AddDepositAccount",
+      path = "/depositaccounts",
+      consumes = APPLICATION_JSON_VALUE,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<AccountDto> addDepositAccount(final AccountDto depositAccount) {
+    log.info("Add a Deposit Account");
+    return investmentService.addDepositAccount(depositAccount);
+  }
+
+  /**
    * Method for Getting All Loan Accounts
    *
    * @return {@link Flux<AccountDto>}
@@ -48,6 +65,21 @@ public class InvestmentController {
   public Flux<AccountDto> getLoanAccounts() {
     log.info("Get all Loan Accounts");
     return investmentService.getLoanAccounts();
+  }
+
+  /**
+   * Method for adding a Loan Accounts
+   *
+   * @return {@link Mono<AccountDto>}
+   */
+  @PostMapping(
+      name = "AddLoanAccount",
+      path = "/loanaccounts",
+      consumes = APPLICATION_JSON_VALUE,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<AccountDto> addLoanAccount(final AccountDto loanAccount) {
+    log.info("Add a Loan Account");
+    return investmentService.addLoanAccount(loanAccount);
   }
 
   /**
@@ -65,6 +97,21 @@ public class InvestmentController {
   }
 
   /**
+   * Method for adding a Miscellaneous Accounts
+   *
+   * @return {@link Mono<MiscellaneousDto>}
+   */
+  @PostMapping(
+      name = "AddMiscellaneousAccount",
+      path = "/miscellaneousaccounts",
+      consumes = APPLICATION_JSON_VALUE,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<MiscellaneousDto> addMiscellaneousAccount(final MiscellaneousDto miscellaneous) {
+    log.info("Add a Miscellaneous Account");
+    return investmentService.addMiscellaneousAccount(miscellaneous);
+  }
+
+  /**
    * Method for Getting All Mutual Funds
    *
    * @return {@link Flux<MutualFundDto>}
@@ -73,6 +120,21 @@ public class InvestmentController {
   public Flux<MutualFundDto> getMutualFunds() {
     log.info("Get all Miscellaneous Accounts");
     return investmentService.getMutualFunds();
+  }
+
+  /**
+   * Method for adding a Mutual Fund
+   *
+   * @return {@link Mono<MutualFundDto>}
+   */
+  @PostMapping(
+      name = "AddMutualFund",
+      path = "/mutualfunds",
+      consumes = APPLICATION_JSON_VALUE,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<MutualFundDto> addMutualFund(final MutualFundDto mutualFund) {
+    log.info("Add a Mutual Fund");
+    return investmentService.addMutualFund(mutualFund);
   }
 
   /**
@@ -90,7 +152,22 @@ public class InvestmentController {
   }
 
   /**
-   * Method for Getting All Saving Accounts
+   * Method for adding a Saving Accounts
+   *
+   * @return {@link Mono<AccountDto>}
+   */
+  @PostMapping(
+      name = "AddSavingAccounts",
+      path = "/savingaccounts",
+      consumes = APPLICATION_JSON_VALUE,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<AccountDto> addSavingAccount(final AccountDto savingAccount) {
+    log.info("Add a Saving Account");
+    return investmentService.addSavingAccount(savingAccount);
+  }
+
+  /**
+   * Method for Getting All Stocks
    *
    * @return {@link Flux<StockDto>}
    */
@@ -98,5 +175,20 @@ public class InvestmentController {
   public Flux<StockDto> getStocks() {
     log.info("Get all Stocks");
     return investmentService.getStocks();
+  }
+
+  /**
+   * Method for adding a Stock
+   *
+   * @return {@link Mono<StockDto>}
+   */
+  @PostMapping(
+      name = "AddStock",
+      path = "/stocks",
+      consumes = APPLICATION_JSON_VALUE,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<StockDto> addStock(final StockDto stock) {
+    log.info("Add a Stock");
+    return investmentService.addStock(stock);
   }
 }
