@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: "user-data"
+  output:
+    ansi:
+      enabled: "always"
+
+logging:
+  level:
+    root: "debug"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "health"
+          - "info"
+          - "metrics"
+  metrics:
+    tags:
+      application: "user-data"
+db:
+  driver: "postgresql"
+  host: "localhost"
+  port: "5432"
+  user: "arun"
+  password: "arun"
+  database: "mydata"
+  schema: "mydata"
+  ssl: "false"
+  connectionTimeout: "100000"
+  protocol: "tcp"
+
+

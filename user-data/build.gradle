@@ -1,0 +1,28 @@
+plugins {
+	id 'com.mydata.springboot-webflux-conventions'
+}
+
+group = 'com.mydata.userdata'
+version = '0.0.1'
+sourceCompatibility = '17'
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation 'io.r2dbc:r2dbc-postgresql'
+
+	testRuntimeOnly 'org.postgresql:postgresql'
+
+	testImplementation 'org.testcontainers:postgresql'
+	testImplementation 'org.testcontainers:r2dbc'
+}
+
+ext {
+	def ENV = System.getenv()
+}
+
+application {
+	mainClass = 'com.mydata.userdata.UserDataApplication'
+}
+
+def jacocoExlude = ['com.mydata.userdata.UserDataApplication', 'com.mydata.userdata.entity.*']
+jacocoTestCoverageVerification.violationRules(vr -> vr.rules.forEach(rule -> rule.excludes = jacocoExlude))
