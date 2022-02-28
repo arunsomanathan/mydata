@@ -1,4 +1,0 @@
-plugins {
-    id 'com.armlestring.java-application-conventions'
-    id 'io.spring.dependency-management'
-}

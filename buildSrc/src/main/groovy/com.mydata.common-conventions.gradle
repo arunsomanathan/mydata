@@ -20,5 +20,4 @@ spotless {
 
 pmd {
     consoleOutput = true
-    ruleSets = ["$rootDir/pmd-rules.xml"]
 }

@@ -1,1 +1,2 @@
-rootProject.name = 'armlestring'
+rootProject.name = 'mydata'
+include('user-data')

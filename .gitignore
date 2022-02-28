@@ -96,3 +96,6 @@ fabric.properties
 .idea/**/sonarlint
 /.idea/inspectionProfiles/Project_Default.xml
 .idea/**/.name
+.idea/**/sonarlint.xml
+.idea/**/sonarlint-state.xml
+.idea/**/git_toolbox_prj.xml

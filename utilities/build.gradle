@@ -1,0 +1,14 @@
+plugins {
+    id 'com.mydata.java-library-conventions'
+}
+
+group = 'com.mydata.utilities'
+version = '0.0.1'
+sourceCompatibility = '17'
+
+dependencies {
+}
+
+ext {
+    def ENV = System.getenv()
+}

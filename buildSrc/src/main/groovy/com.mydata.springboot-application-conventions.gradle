@@ -1,5 +1,5 @@
 plugins {
-    id 'com.armlestring.spring-application-conventions'
+    id 'com.mydata.spring-application-conventions'
     id 'org.springframework.boot'
 }
 
@@ -10,6 +10,10 @@ configurations {
     }
 }
 
+ext {
+    set('testcontainersVersion', "1.16.2")
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
@@ -18,4 +22,11 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+    }
 }
