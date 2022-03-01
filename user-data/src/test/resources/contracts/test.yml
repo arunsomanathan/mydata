@@ -1,0 +1,19 @@
+request:
+  method: POST
+  url: /depositaccounts
+  body:
+    bankName: "test"
+    branchName: "test"
+    accountNumber: "123"
+    balance: 0
+  headers:
+    Content-Type: application/json
+response:
+  status: 200
+  body:
+    bankName: "test"
+    branchName: "test"
+    accountNumber: "123"
+    balance: 0
+  headers:
+    Content-Type: application/json;charset=UTF-8

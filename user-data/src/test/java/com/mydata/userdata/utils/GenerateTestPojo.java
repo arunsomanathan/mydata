@@ -11,13 +11,23 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.IntStream;
-import org.apache.commons.lang3.RandomStringUtils;
+import net.datafaker.Faker;
+import net.datafaker.Finance;
+import net.datafaker.Number;
+import net.datafaker.Science;
 
 /** Generate Entities for test */
 public final class GenerateTestPojo {
 
-  private static final BeanTransformer beanTransformer = new BeanUtils().getTransformer();
-  public static Integer id = Integer.MIN_VALUE;
+  private static final BeanTransformer BT = new BeanUtils().getTransformer();
+  private static final Science SCIENCE_DATA = new Faker().science();
+  private static final Finance FINANCE_DATA = new Faker().finance();
+  private static final Number NUMBER_DATA = new Faker().number();
+  private static final net.datafaker.Stock STOCK_DATA = new Faker().stock();
+  private static final Integer MIN_VALUE = Integer.MIN_VALUE;
+  private static final Integer MAX_VALUE = Integer.MAX_VALUE;
+  private static final Integer ZERO_VALUE = 0;
+  private static Integer id = 0;
 
   /**
    * Generate List of Accounts
@@ -36,29 +46,11 @@ public final class GenerateTestPojo {
    */
   public static AccountDto getSingleAccountDto() {
     return new AccountDto(
-        getTestInt(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
-        new BigDecimal(Math.abs(getTestInt())));
-  }
-
-  /**
-   * Generate random Alpha Numeric String
-   *
-   * @return a random string
-   */
-  private static String getTestString() {
-    return RandomStringUtils.random(8, true, true);
-  }
-
-  /**
-   * Get Integer by incrementing
-   *
-   * @return am integer
-   */
-  private static Integer getTestInt() {
-    return id++;
+        ++id,
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        FINANCE_DATA.iban(),
+        BigDecimal.valueOf(NUMBER_DATA.randomDouble(2, MIN_VALUE, MAX_VALUE)));
   }
 
   /**
@@ -78,7 +70,9 @@ public final class GenerateTestPojo {
    */
   public static MiscellaneousDto getSingleMiscellaneousDto() {
     return new MiscellaneousDto(
-        getTestInt(), getTestString(), new BigDecimal(Math.abs(getTestInt())));
+        ++id,
+        SCIENCE_DATA.element(),
+        BigDecimal.valueOf(NUMBER_DATA.randomDouble(2, ZERO_VALUE, MAX_VALUE)));
   }
 
   /**
@@ -98,7 +92,11 @@ public final class GenerateTestPojo {
    */
   public static MutualFundDto getSingleMutualFundDto() {
     return new MutualFundDto(
-        getTestInt(), getTestString(), getTestString(), getTestString(), getTestString());
+        ++id,
+        STOCK_DATA.nsdqSymbol(),
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        SCIENCE_DATA.quark());
   }
 
   /**
@@ -118,7 +116,11 @@ public final class GenerateTestPojo {
    */
   public static StockDto getSingleStockDto() {
     return new StockDto(
-        getTestInt(), getTestString(), getTestString(), getTestString(), getTestString());
+        ++id,
+        STOCK_DATA.nsdqSymbol(),
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        SCIENCE_DATA.quark());
   }
 
   /**
@@ -138,11 +140,11 @@ public final class GenerateTestPojo {
    */
   public static DepositAccount getSingleDepositAccount() {
     return new DepositAccount(
-        getTestInt(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
-        new BigDecimal(Math.abs(getTestInt())),
+        ++id,
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        FINANCE_DATA.iban(),
+        BigDecimal.valueOf(NUMBER_DATA.randomDouble(2, ZERO_VALUE, MAX_VALUE)),
         Instant.now(),
         Instant.now(),
         false);
@@ -164,7 +166,7 @@ public final class GenerateTestPojo {
    * @return {@link AccountDto}
    */
   public static AccountDto getSingleAccountDto(Object account) {
-    return beanTransformer.transform(account, AccountDto.class);
+    return BT.transform(account, AccountDto.class);
   }
 
   /**
@@ -184,11 +186,11 @@ public final class GenerateTestPojo {
    */
   public static Loan getSingleLoanAccount() {
     return new Loan(
-        getTestInt(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
-        new BigDecimal(Math.abs(getTestInt())),
+        ++id,
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        FINANCE_DATA.iban(),
+        BigDecimal.valueOf(NUMBER_DATA.randomDouble(2, MIN_VALUE, ZERO_VALUE)),
         Instant.now(),
         Instant.now(),
         false);
@@ -211,11 +213,11 @@ public final class GenerateTestPojo {
    */
   public static SavingAccount getSingleSavingAccount() {
     return new SavingAccount(
-        getTestInt(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
-        new BigDecimal(Math.abs(getTestInt())),
+        ++id,
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        FINANCE_DATA.iban(),
+        BigDecimal.valueOf(NUMBER_DATA.randomDouble(2, ZERO_VALUE, MAX_VALUE)),
         Instant.now(),
         Instant.now(),
         false);
@@ -238,9 +240,9 @@ public final class GenerateTestPojo {
    */
   public static Miscellaneous getSingleMiscellaneous() {
     return new Miscellaneous(
-        getTestInt(),
-        getTestString(),
-        new BigDecimal(Math.abs(getTestInt())),
+        ++id,
+        SCIENCE_DATA.element(),
+        BigDecimal.valueOf(NUMBER_DATA.randomDouble(2, ZERO_VALUE, MAX_VALUE)),
         Instant.now(),
         Instant.now(),
         false);
@@ -263,7 +265,7 @@ public final class GenerateTestPojo {
    * @return {@link MiscellaneousDto}
    */
   public static MiscellaneousDto getSingleMiscellaneousDto(Miscellaneous miscellaneous) {
-    return beanTransformer.transform(miscellaneous, MiscellaneousDto.class);
+    return BT.transform(miscellaneous, MiscellaneousDto.class);
   }
 
   /**
@@ -283,11 +285,11 @@ public final class GenerateTestPojo {
    */
   public static MutualFund getSingleMutualFund() {
     return new MutualFund(
-        getTestInt(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
+        ++id,
+        STOCK_DATA.nsdqSymbol(),
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        SCIENCE_DATA.quark(),
         Instant.now(),
         Instant.now(),
         false);
@@ -310,7 +312,7 @@ public final class GenerateTestPojo {
    * @return {@link MutualFundDto}
    */
   public static MutualFundDto getSingleMutualFundDto(MutualFund mutualFund) {
-    return beanTransformer.transform(mutualFund, MutualFundDto.class);
+    return BT.transform(mutualFund, MutualFundDto.class);
   }
 
   /**
@@ -330,11 +332,11 @@ public final class GenerateTestPojo {
    */
   public static Stock getSingleStock() {
     return new Stock(
-        getTestInt(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
-        getTestString(),
+        ++id,
+        STOCK_DATA.nsdqSymbol(),
+        SCIENCE_DATA.element(),
+        SCIENCE_DATA.bosons(),
+        SCIENCE_DATA.quark(),
         Instant.now(),
         Instant.now(),
         false);
@@ -357,6 +359,6 @@ public final class GenerateTestPojo {
    * @return {@link StockDto}
    */
   public static StockDto getStockDto(Stock stock) {
-    return beanTransformer.transform(stock, StockDto.class);
+    return BT.transform(stock, StockDto.class);
   }
 }

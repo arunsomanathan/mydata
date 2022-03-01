@@ -1,0 +1,4 @@
+plugins {
+    id 'com.mydata.java-library-conventions'
+    id 'io.spring.dependency-management'
+}

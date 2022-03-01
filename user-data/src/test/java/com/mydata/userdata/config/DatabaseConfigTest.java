@@ -3,7 +3,7 @@ package com.mydata.userdata.config;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.mydata.userdata.property.DatabaseProperties;
-import com.mydata.userdata.utils.YamlPropertySourceFactory;
+import com.mydata.utilities.spring.YamlPropertySourceFactory;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
