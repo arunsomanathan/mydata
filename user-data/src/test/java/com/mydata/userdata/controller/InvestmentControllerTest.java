@@ -1,8 +1,5 @@
 package com.mydata.userdata.controller;
 
-import static com.mydata.userdata.utils.WebTestClientUtil.assertBodyEquals;
-import static com.mydata.userdata.utils.WebTestClientUtil.get;
-import static com.mydata.userdata.utils.WebTestClientUtil.post;
 import static org.mockito.Mockito.*;
 
 import com.expediagroup.beans.BeanUtils;
@@ -13,8 +10,7 @@ import com.mydata.userdata.dto.MutualFundDto;
 import com.mydata.userdata.dto.StockDto;
 import com.mydata.userdata.service.InvestmentService;
 import com.mydata.userdata.utils.GenerateTestPojo;
-import com.mydata.userdata.utils.WebTestClientUtil;
-import java.util.List;
+import com.mydata.utilities.test.conroller.ControllerTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +30,7 @@ import reactor.core.publisher.Mono;
 @WebFluxTest(controllers = InvestmentController.class)
 @AutoConfigureRestDocs
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
-class InvestmentControllerTest {
+class InvestmentControllerTest implements ControllerTest {
 
   private static final String ID_FIELD = "id";
 
@@ -54,63 +50,20 @@ class InvestmentControllerTest {
   private final BeanTransformer dtoToDtoSkipId =
       new BeanUtils().getTransformer().skipTransformationForField(ID_FIELD);
 
+  @Override
+  public WebTestClient getWebTestClient() {
+    return webTestClient;
+  }
+
+  @Override
+  public String getBaseUrl() {
+    return INVESTMENT_BASE_URL;
+  }
+
   /** Executes after each test */
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(investmentService);
-  }
-
-  /**
-   * Get Request to given url
-   *
-   * @param apiUrl the api URL
-   * @return the {@link WebTestClient.ResponseSpec}
-   */
-  private WebTestClient.ResponseSpec getResponse(final String apiUrl) {
-    return get(webTestClient, INVESTMENT_BASE_URL, apiUrl);
-  }
-
-  /**
-   * Send Get request and verify response
-   *
-   * @param apiUrl the API URL
-   * @param dtoList list of dto objects
-   * @param dtoClass the dto object class
-   */
-  private <D> void verifyGet(final String apiUrl, final List<D> dtoList, final Class<D> dtoClass) {
-    getResponse(apiUrl)
-        .expectAll(
-            WebTestClientUtil::isOk,
-            WebTestClientUtil::isContentTypeJson,
-            responseSpec -> assertBodyEquals(responseSpec, dtoClass, dtoList, apiUrl));
-  }
-
-  /**
-   * Post Request to a given url
-   *
-   * @param apiUrl the api URL
-   * @param requestBodyObj the body of request
-   * @return the {@link WebTestClient.ResponseSpec}
-   */
-  private <T> WebTestClient.ResponseSpec postResponse(final String apiUrl, final T requestBodyObj) {
-    return post(webTestClient, INVESTMENT_BASE_URL, apiUrl, requestBodyObj);
-  }
-
-  /**
-   * Send Post request and verify response
-   *
-   * @param requestObj the request object
-   * @param apiUrl the API URL
-   * @param dto the dto objects
-   * @param dtoClass the dto object class
-   */
-  private <T, D> void verifyPost(
-      final String apiUrl, final T requestObj, final D dto, final Class<D> dtoClass) {
-    postResponse(apiUrl, requestObj)
-        .expectAll(
-            WebTestClientUtil::isOk,
-            WebTestClientUtil::isContentTypeJson,
-            responseSpec -> assertBodyEquals(responseSpec, dtoClass, dto, apiUrl));
   }
 
   /** Test for {@link InvestmentController#getDepositAccounts()} */

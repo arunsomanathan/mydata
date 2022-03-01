@@ -1,10 +1,8 @@
 package com.mydata.userdata.integration;
 
-import static com.mydata.userdata.utils.WebTestClientUtil.get;
-
 import com.mydata.userdata.controller.InvestmentController;
 import com.mydata.userdata.dto.AccountDto;
-import com.mydata.userdata.utils.WebTestClientUtil;
+import com.mydata.utilities.test.conroller.ControllerTest;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +24,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureWebTestClient
 @Testcontainers
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
-public class UserDataTest {
+public class UserDataTest implements ControllerTest {
 
   private static final String INVESTMENT_BASE_URL = "/investment";
 
@@ -65,18 +63,16 @@ public class UserDataTest {
   @DisplayName("Integration Test: Get Deposit Accounts")
   void getDepositAccounts() {
     final List<AccountDto> accounts;
-    getResponse(DEPOSIT_ACCOUNTS_URL)
-        .expectAll(
-            WebTestClientUtil::isOk, WebTestClientUtil::isContentTypeJson
-            //                                responseSpec ->
-            //                                        assertBodyEquals(responseSpec,
-            // AccountDto.class, accounts,
-            //             DEPOSIT_ACCOUNTS_URL)
-            );
+    // verifyGet(DEPOSIT_ACCOUNTS_URL, accounts, AccountDto.class);
   }
 
-  /** Get Request to given url */
-  private WebTestClient.ResponseSpec getResponse(final String apiUrl) {
-    return get(webTestClient, INVESTMENT_BASE_URL, apiUrl);
+  @Override
+  public WebTestClient getWebTestClient() {
+    return webTestClient;
+  }
+
+  @Override
+  public String getBaseUrl() {
+    return INVESTMENT_BASE_URL;
   }
 }

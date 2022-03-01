@@ -1,4 +1,4 @@
-package com.mydata.userdata.utils;
+package com.mydata.utilities.spring;
 
 import java.util.Objects;
 import java.util.Properties;

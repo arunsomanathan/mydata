@@ -3,6 +3,9 @@ plugins {
     id 'org.springframework.boot'
 }
 
+springBoot {
+    buildInfo()
+}
 
 configurations {
     compileOnly {

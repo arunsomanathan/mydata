@@ -2,7 +2,7 @@ package com.mydata.userdata.property;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.mydata.userdata.utils.YamlPropertySourceFactory;
+import com.mydata.utilities.spring.YamlPropertySourceFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
