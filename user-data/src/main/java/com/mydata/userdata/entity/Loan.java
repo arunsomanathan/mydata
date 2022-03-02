@@ -8,7 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.relational.core.mapping.Table;
 
 /** Entity Record for Loan */
-@Table
+@Table("loan_account")
 public record Loan(
     @Id Integer id,
     String bankName,

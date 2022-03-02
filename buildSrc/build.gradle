@@ -6,14 +6,24 @@ repositories {
     gradlePluginPortal()
 }
 
+ext {
+    set('springBootVersion', '2.6.4')
+    set('springDependencyManagementVersion', '1.0.11.RELEASE')
+    set('asciiDoctorVersion', '3.3.2')
+    set('spotlessVersion', '6.3.0')
+    set('gitPropertiesVersion', '2.4.0')
+    set('verifierVersion', '3.1.1')
+}
+
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-gradle-plugin:2.6.4'
-    implementation 'io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin:' + springBootVersion
+    implementation 'io.spring.gradle:dependency-management-plugin:' + springDependencyManagementVersion
+    implementation 'gradle.plugin.org.springframework.cloud:spring-cloud-contract-gradle-plugin:' + verifierVersion
 
-    implementation 'org.asciidoctor:asciidoctor-gradle-jvm:3.3.2'
+    implementation 'org.asciidoctor:asciidoctor-gradle-jvm:' + asciiDoctorVersion
 
-    implementation 'com.diffplug.spotless:spotless-plugin-gradle:6.3.0'
+    implementation 'com.diffplug.spotless:spotless-plugin-gradle:' + spotlessVersion
 
-    implementation 'com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.0'
+    implementation 'com.gorylenko.gradle-git-properties:gradle-git-properties:' + gitPropertiesVersion
 
 }

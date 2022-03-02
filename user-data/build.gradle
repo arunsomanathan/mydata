@@ -27,3 +27,28 @@ application {
 
 def jacocoExlude = ['com.mydata.userdata.UserDataApplication', 'com.mydata.userdata.entity.*']
 jacocoTestCoverageVerification.violationRules(vr -> vr.rules.forEach(rule -> rule.excludes = jacocoExlude))
+
+contracts {
+	testFramework = "JUNIT5"
+	testMode = "EXPLICIT"
+	packageWithBaseClasses = 'com.mydata.userdata.contract'
+}
+
+contractTest {
+	useJUnitPlatform()
+	testLogging {
+		exceptionFormat = 'full'
+	}
+	afterSuite { desc, result ->
+		if (!desc.parent) {
+			println "Results: (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+			boolean skipTests = Boolean.parseBoolean(project.findProperty('SKIP_TESTS') ?: "false")
+			if (result.testCount == 0 && !skipTests) {
+				throw new IllegalStateException("No tests were found. Failing the build")
+			}
+		}
+	}
+}
+
+//Disable pmdContractTest
+pmdContractTest.onlyIf { false }

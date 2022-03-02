@@ -1,16 +1,12 @@
-package com.mydata.userdata.integration;
+package com.mydata.userdata.contract;
 
-import com.mydata.userdata.controller.InvestmentController;
-import com.mydata.userdata.dto.AccountDto;
-import com.mydata.utilities.test.conroller.ControllerTest;
 import io.r2dbc.spi.ConnectionFactoryOptions;
-import java.util.List;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -20,15 +16,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @MockitoSettings
-@SpringBootTest
-@AutoConfigureWebTestClient
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "server.port=0")
 @Testcontainers
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
-public class UserDataTest implements ControllerTest {
-
-  private static final String INVESTMENT_BASE_URL = "/investment";
-
-  private static final String DEPOSIT_ACCOUNTS_URL = "depositaccounts";
+public abstract class InvestmentBase {
 
   private static final String POSTGRESQL_IMAGE = "postgres:13.5";
   private static final String DB_NAME = "testDB";
@@ -43,6 +36,7 @@ public class UserDataTest implements ControllerTest {
           .withPassword(PASSWORD)
           .withInitScript("sql/db-init.sql");
 
+  @LocalServerPort int port;
   @Autowired private WebTestClient webTestClient;
 
   @DynamicPropertySource
@@ -58,21 +52,8 @@ public class UserDataTest implements ControllerTest {
     registry.add("db.schema", () -> "public");
   }
 
-  /** Test for {@link InvestmentController#getDepositAccounts()} */
-  @Test
-  @DisplayName("Integration Test: Get Deposit Accounts")
-  void getDepositAccounts() {
-    final List<AccountDto> accounts;
-    // verifyGet(DEPOSIT_ACCOUNTS_URL, accounts, AccountDto.class);
-  }
-
-  @Override
-  public WebTestClient getWebTestClient() {
-    return webTestClient;
-  }
-
-  @Override
-  public String getBaseUrl() {
-    return INVESTMENT_BASE_URL;
+  @BeforeEach
+  public void setup() {
+    RestAssured.baseURI = "http://localhost:" + this.port;
   }
 }
