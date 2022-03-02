@@ -1,5 +1,7 @@
 package com.mydata.userdata.controller;
 
+import static com.mydata.userdata.common.ObjectProperties.ACCOUNT_ID;
+import static com.mydata.userdata.common.URLs.*;
 import static org.mockito.Mockito.*;
 
 import com.expediagroup.beans.BeanUtils;
@@ -29,26 +31,14 @@ import reactor.core.publisher.Mono;
 @MockitoSettings
 @WebFluxTest(controllers = InvestmentController.class)
 @AutoConfigureRestDocs
+@DisplayName("Investment Controller Test")
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
 class InvestmentControllerTest implements ControllerTest {
 
-  private static final String ID_FIELD = "id";
-
-  private static final String INVESTMENT_BASE_URL = "/investment";
-
-  private static final String DEPOSIT_ACCOUNTS_URL = "depositaccounts";
-  private static final String LOAN_ACCOUNTS_URL = "loanaccounts";
-  private static final String MISCELLANEOUS_ACCOUNTS_URL = "miscellaneousaccounts";
-  private static final String MUTUAL_FUNDS_URL = "mutualfunds";
-  private static final String SAVING_ACCOUNTS_URL = "savingaccounts";
-  private static final String STOCKS_URL = "stocks";
-
-  @Autowired private WebTestClient webTestClient;
-
-  @MockBean private InvestmentService investmentService;
-
   private final BeanTransformer dtoToDtoSkipId =
-      new BeanUtils().getTransformer().skipTransformationForField(ID_FIELD);
+      new BeanUtils().getTransformer().skipTransformationForField(ACCOUNT_ID);
+  @Autowired private WebTestClient webTestClient;
+  @MockBean private InvestmentService investmentService;
 
   @Override
   public WebTestClient getWebTestClient() {
@@ -69,11 +59,11 @@ class InvestmentControllerTest implements ControllerTest {
   /** Test for {@link InvestmentController#getDepositAccounts()} */
   @ParameterizedTest
   @ValueSource(ints = 10)
-  @DisplayName("Happy Path: Get Deposit Accounts")
+  @DisplayName("Happy Path: Controller: Get Deposit Accounts")
   void getDepositAccounts(final int count) {
     var accounts = GenerateTestPojo.getAccountsDto(count);
     when(investmentService.getDepositAccounts()).thenReturn(Flux.fromIterable(accounts));
-    verifyGet(DEPOSIT_ACCOUNTS_URL, accounts, AccountDto.class);
+    verifyGetAndDocument(DEPOSIT_ACCOUNTS_URL, accounts, AccountDto.class);
     verify(investmentService, times(1)).getDepositAccounts();
   }
 
@@ -84,7 +74,7 @@ class InvestmentControllerTest implements ControllerTest {
     var depositAccount = GenerateTestPojo.getSingleAccountDto();
     when(investmentService.addDepositAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(depositAccount));
-    verifyPost(
+    verifyPostAndDocument(
         DEPOSIT_ACCOUNTS_URL,
         dtoToDtoSkipId.transform(depositAccount, AccountDto.class),
         depositAccount,
@@ -99,7 +89,7 @@ class InvestmentControllerTest implements ControllerTest {
   void getLoanAccounts(final int count) {
     var accounts = GenerateTestPojo.getAccountsDto(count);
     when(investmentService.getLoanAccounts()).thenReturn(Flux.fromIterable(accounts));
-    verifyGet(LOAN_ACCOUNTS_URL, accounts, AccountDto.class);
+    verifyGetAndDocument(LOAN_ACCOUNTS_URL, accounts, AccountDto.class);
     verify(investmentService, times(1)).getLoanAccounts();
   }
 
@@ -110,7 +100,7 @@ class InvestmentControllerTest implements ControllerTest {
     var loanAccount = GenerateTestPojo.getSingleAccountDto();
     when(investmentService.addLoanAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(loanAccount));
-    verifyPost(
+    verifyPostAndDocument(
         LOAN_ACCOUNTS_URL,
         dtoToDtoSkipId.transform(loanAccount, AccountDto.class),
         loanAccount,
@@ -125,7 +115,7 @@ class InvestmentControllerTest implements ControllerTest {
   void getMiscellaneousAccounts(final int count) {
     var accounts = GenerateTestPojo.getMiscellaneousDto(count);
     when(investmentService.getMiscellaneousAccounts()).thenReturn(Flux.fromIterable(accounts));
-    verifyGet(MISCELLANEOUS_ACCOUNTS_URL, accounts, MiscellaneousDto.class);
+    verifyGetAndDocument(MISCELLANEOUS_ACCOUNTS_URL, accounts, MiscellaneousDto.class);
     verify(investmentService, times(1)).getMiscellaneousAccounts();
   }
 
@@ -138,7 +128,7 @@ class InvestmentControllerTest implements ControllerTest {
     var miscellaneousDto = GenerateTestPojo.getSingleMiscellaneousDto();
     when(investmentService.addMiscellaneousAccount(any(MiscellaneousDto.class)))
         .thenReturn(Mono.just(miscellaneousDto));
-    verifyPost(
+    verifyPostAndDocument(
         MISCELLANEOUS_ACCOUNTS_URL,
         dtoToDtoSkipId.transform(miscellaneousDto, MiscellaneousDto.class),
         miscellaneousDto,
@@ -153,7 +143,7 @@ class InvestmentControllerTest implements ControllerTest {
   void getMutualFunds(final int count) {
     var mutualFunds = GenerateTestPojo.getMutualFundsDto(count);
     when(investmentService.getMutualFunds()).thenReturn(Flux.fromIterable(mutualFunds));
-    verifyGet(MUTUAL_FUNDS_URL, mutualFunds, MutualFundDto.class);
+    verifyGetAndDocument(MUTUAL_FUNDS_URL, mutualFunds, MutualFundDto.class);
     verify(investmentService, times(1)).getMutualFunds();
   }
 
@@ -164,7 +154,7 @@ class InvestmentControllerTest implements ControllerTest {
     var mutualFundDto = GenerateTestPojo.getSingleMutualFundDto();
     when(investmentService.addMutualFund(any(MutualFundDto.class)))
         .thenReturn(Mono.just(mutualFundDto));
-    verifyPost(
+    verifyPostAndDocument(
         MUTUAL_FUNDS_URL,
         dtoToDtoSkipId.transform(mutualFundDto, MutualFundDto.class),
         mutualFundDto,
@@ -179,7 +169,7 @@ class InvestmentControllerTest implements ControllerTest {
   void getSavingAccounts(final int count) {
     var accounts = GenerateTestPojo.getAccountsDto(count);
     when(investmentService.getSavingAccounts()).thenReturn(Flux.fromIterable(accounts));
-    verifyGet(SAVING_ACCOUNTS_URL, accounts, AccountDto.class);
+    verifyGetAndDocument(SAVING_ACCOUNTS_URL, accounts, AccountDto.class);
     verify(investmentService, times(1)).getSavingAccounts();
   }
 
@@ -190,7 +180,7 @@ class InvestmentControllerTest implements ControllerTest {
     var savingAccountDto = GenerateTestPojo.getSingleAccountDto();
     when(investmentService.addSavingAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(savingAccountDto));
-    verifyPost(
+    verifyPostAndDocument(
         SAVING_ACCOUNTS_URL,
         dtoToDtoSkipId.transform(savingAccountDto, AccountDto.class),
         savingAccountDto,
@@ -205,7 +195,7 @@ class InvestmentControllerTest implements ControllerTest {
   void getStocks(final int count) {
     var stocks = GenerateTestPojo.getStocksDto(count);
     when(investmentService.getStocks()).thenReturn(Flux.fromIterable(stocks));
-    verifyGet(STOCKS_URL, stocks, StockDto.class);
+    verifyGetAndDocument(STOCKS_URL, stocks, StockDto.class);
     verify(investmentService, times(1)).getStocks();
   }
 
@@ -215,7 +205,7 @@ class InvestmentControllerTest implements ControllerTest {
   void addStock() {
     var stocksDto = GenerateTestPojo.getSingleStockDto();
     when(investmentService.addStock(any(StockDto.class))).thenReturn(Mono.just(stocksDto));
-    verifyPost(
+    verifyPostAndDocument(
         STOCKS_URL, dtoToDtoSkipId.transform(stocksDto, StockDto.class), stocksDto, StockDto.class);
     verify(investmentService, times(1)).addStock(any(StockDto.class));
   }

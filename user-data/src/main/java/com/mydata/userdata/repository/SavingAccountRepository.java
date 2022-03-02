@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux;
 
 public interface SavingAccountRepository extends ReactiveCrudRepository<SavingAccount, Integer> {
 
-  /** Find Active Records */
-  Flux<SavingAccount> findByActiveTrue();
+  /** Find Records By Active Column */
+  Flux<SavingAccount> findByActive(Boolean active);
 }

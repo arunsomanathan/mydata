@@ -1,13 +1,14 @@
 package com.mydata.utilities.spring;
 
-import java.util.Objects;
-import java.util.Properties;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.lang.NonNull;
+
+import java.util.Objects;
+import java.util.Properties;
 
 /** For reading the Yaml properties file */
 public final class YamlPropertySourceFactory implements PropertySourceFactory {

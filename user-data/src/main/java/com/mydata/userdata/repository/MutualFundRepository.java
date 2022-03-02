@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux;
 
 public interface MutualFundRepository extends ReactiveCrudRepository<MutualFund, Integer> {
 
-  /** Find Active Records */
-  Flux<MutualFund> findByActiveTrue();
+  /** Find Records By Active Column */
+  Flux<MutualFund> findByActive(Boolean active);
 }

@@ -49,7 +49,7 @@ class InvestmentServiceTest {
   void getDepositAccounts(final int count) {
     var depositAccounts = GenerateTestPojo.getDepositAccounts(count);
     var accountsDto = getAccountsDto(depositAccounts);
-    when(depositAccountRepository.findByActiveTrue())
+    when(depositAccountRepository.findByActive(Boolean.TRUE))
         .thenReturn(Flux.fromIterable(depositAccounts));
     StepVerifier.create(investmentService.getDepositAccounts().log())
         .expectNext(accountsDto.toArray(new AccountDto[0]))
@@ -82,7 +82,7 @@ class InvestmentServiceTest {
   void getLoanAccounts(final int count) {
     var loanAccounts = GenerateTestPojo.getLoanAccounts(count);
     var accountsDto = getAccountsDto(loanAccounts);
-    when(loanRepository.findByActiveTrue()).thenReturn(Flux.fromIterable(loanAccounts));
+    when(loanRepository.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(loanAccounts));
     StepVerifier.create(investmentService.getLoanAccounts().log())
         .expectNext(accountsDto.toArray(new AccountDto[0]))
         .expectComplete()
@@ -109,7 +109,8 @@ class InvestmentServiceTest {
   void getMiscellaneousAccounts(final int count) {
     var miscellaneous = GenerateTestPojo.getMiscellaneous(count);
     var miscellaneousDto = getMiscellaneousDto(miscellaneous);
-    when(miscellaneousRepository.findByActiveTrue()).thenReturn(Flux.fromIterable(miscellaneous));
+    when(miscellaneousRepository.findByActive(Boolean.TRUE))
+        .thenReturn(Flux.fromIterable(miscellaneous));
     StepVerifier.create(investmentService.getMiscellaneousAccounts().log())
         .expectNext(miscellaneousDto.toArray(new MiscellaneousDto[0]))
         .expectComplete()
@@ -136,7 +137,8 @@ class InvestmentServiceTest {
   void getMutualFund(final int count) {
     var mutualFunds = GenerateTestPojo.getMutualFunds(count);
     var mutualFundsDto = getMutualFundsDto(mutualFunds);
-    when(mutualFundRepository.findByActiveTrue()).thenReturn(Flux.fromIterable(mutualFunds));
+    when(mutualFundRepository.findByActive(Boolean.TRUE))
+        .thenReturn(Flux.fromIterable(mutualFunds));
     StepVerifier.create(investmentService.getMutualFunds().log())
         .expectNext(mutualFundsDto.toArray(new MutualFundDto[0]))
         .expectComplete()
@@ -162,7 +164,8 @@ class InvestmentServiceTest {
   void getSavingAccounts(final int count) {
     var savingAccounts = GenerateTestPojo.getSavingAccounts(count);
     var accounts = getAccountsDto(savingAccounts);
-    when(savingAccountRepository.findByActiveTrue()).thenReturn(Flux.fromIterable(savingAccounts));
+    when(savingAccountRepository.findByActive(Boolean.TRUE))
+        .thenReturn(Flux.fromIterable(savingAccounts));
     StepVerifier.create(investmentService.getSavingAccounts().log())
         .expectNext(accounts.toArray(new AccountDto[0]))
         .expectComplete()
@@ -189,7 +192,7 @@ class InvestmentServiceTest {
   void getStocks(final int count) {
     var stocks = GenerateTestPojo.getStocks(count);
     var stocksDto = getStocksDto(stocks);
-    when(stockRepository.findByActiveTrue()).thenReturn(Flux.fromIterable(stocks));
+    when(stockRepository.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stocks));
     StepVerifier.create(investmentService.getStocks().log())
         .expectNext(stocksDto.toArray(new StockDto[0]))
         .expectComplete()

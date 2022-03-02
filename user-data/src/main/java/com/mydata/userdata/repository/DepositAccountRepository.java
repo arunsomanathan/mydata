@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux;
 
 public interface DepositAccountRepository extends ReactiveCrudRepository<DepositAccount, Integer> {
 
-  /** Find Active Records */
-  Flux<DepositAccount> findByActiveTrue();
+  /** Find Records By Active Column */
+  Flux<DepositAccount> findByActive(Boolean active);
 }

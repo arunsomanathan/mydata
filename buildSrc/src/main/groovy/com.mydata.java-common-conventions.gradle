@@ -45,6 +45,7 @@ spotless {
         importOrder()
         removeUnusedImports()
         googleJavaFormat()
+        targetExclude("build/generated-test-sources/**/*.java")
     }
 }
 

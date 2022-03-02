@@ -1,5 +1,7 @@
 package com.mydata.userdata.service;
 
+import static com.mydata.userdata.common.ObjectProperties.*;
+
 import com.expediagroup.beans.BeanUtils;
 import com.expediagroup.beans.transformer.BeanTransformer;
 import com.expediagroup.transformer.model.FieldTransformer;
@@ -28,23 +30,20 @@ public class InvestmentService {
   private final SavingAccountRepository savingAccountRepository;
   private final StockRepository stockRepository;
 
-  // TODO: These can be common constants
-  private static final String ID_FIELD = "id";
-  private static final String MODIFIED_AT_FIELD = "modifiedAt";
-  private static final String CREATED_AT_FIELD = "createdAt";
-  private static final String ACTIVE_FIELD = "createdAt";
+  private final FieldTransformer<Boolean, Boolean> trueActiveTransformer =
+      new FieldTransformer<>(ACCOUNT_ACTIVE, () -> Boolean.TRUE);
 
-  private final FieldTransformer<String, Boolean> activeFieldTransformer =
-      new FieldTransformer<>("active", () -> Boolean.TRUE);
+  private final FieldTransformer<String, String> nullIdTransformer =
+      new FieldTransformer<>(ACCOUNT_ID, () -> null);
+
   private final BeanTransformer dtoToEntitySkipId =
       new BeanUtils()
           .getTransformer()
-          .withFieldTransformer(activeFieldTransformer)
-          .skipTransformationForField(CREATED_AT_FIELD)
-          .skipTransformationForField(MODIFIED_AT_FIELD)
-          .skipTransformationForField(ID_FIELD)
-          .skipTransformationForField(ACTIVE_FIELD)
-          .setDefaultValueForMissingField(true);
+          .withFieldTransformer(nullIdTransformer, trueActiveTransformer)
+          .skipTransformationForField(ACCOUNT_MODIFIED_AT, ACCOUNT_CREATED_AT)
+          .setDefaultValueForMissingField(false)
+          .setDefaultValueForMissingPrimitiveField(false);
+
   private final BeanTransformer entityToDto = new BeanUtils().getTransformer();
 
   /**
@@ -55,7 +54,7 @@ public class InvestmentService {
   public Flux<AccountDto> getDepositAccounts() {
     log.info("Fetching all Active Deposit Accounts");
     return depositAccountRepository
-        .findByActiveTrue()
+        .findByActive(Boolean.TRUE)
         .map(da -> entityToDto.transform(da, AccountDto.class));
   }
 
@@ -80,7 +79,7 @@ public class InvestmentService {
   public Flux<AccountDto> getLoanAccounts() {
     log.info("Fetching all Active Loan Accounts");
     return loanRepository
-        .findByActiveTrue()
+        .findByActive(Boolean.TRUE)
         .map(loan -> entityToDto.transform(loan, AccountDto.class));
   }
 
@@ -105,7 +104,7 @@ public class InvestmentService {
   public Flux<MiscellaneousDto> getMiscellaneousAccounts() {
     log.info("Fetching all Active Miscellaneous Accounts");
     return miscellaneousRepository
-        .findByActiveTrue()
+        .findByActive(Boolean.TRUE)
         .map(misc -> entityToDto.transform(misc, MiscellaneousDto.class));
   }
 
@@ -131,7 +130,7 @@ public class InvestmentService {
   public Flux<MutualFundDto> getMutualFunds() {
     log.info("Fetching all Active MutualFunds");
     return mutualFundRepository
-        .findByActiveTrue()
+        .findByActive(Boolean.TRUE)
         .map(mf -> entityToDto.transform(mf, MutualFundDto.class));
   }
 
@@ -156,7 +155,7 @@ public class InvestmentService {
   public Flux<AccountDto> getSavingAccounts() {
     log.info("Fetching all Active Saving Accounts");
     return savingAccountRepository
-        .findByActiveTrue()
+        .findByActive(Boolean.TRUE)
         .map(sa -> entityToDto.transform(sa, AccountDto.class));
   }
 
@@ -181,7 +180,7 @@ public class InvestmentService {
   public Flux<StockDto> getStocks() {
     log.info("Fetching all Active Stocks");
     return stockRepository
-        .findByActiveTrue()
+        .findByActive(Boolean.TRUE)
         .map(stock -> entityToDto.transform(stock, StockDto.class));
   }
 

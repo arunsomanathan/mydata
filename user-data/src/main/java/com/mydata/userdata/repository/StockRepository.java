@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux;
 
 public interface StockRepository extends ReactiveCrudRepository<Stock, Integer> {
 
-  /** Find Active Records */
-  Flux<Stock> findByActiveTrue();
+  /** Find Records By Active Column */
+  Flux<Stock> findByActive(Boolean active);
 }
