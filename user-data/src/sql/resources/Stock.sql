@@ -1,5 +1,5 @@
 create table if not exists stock(
-    id integer primary key,
+    id serial primary key,
     stock_code text not null unique,
     stock_name text not null unique,
     stock_exchange text not null,

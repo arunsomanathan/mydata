@@ -1,5 +1,5 @@
 create table if not exists mutual_fund(
-    id integer primary key,
+    id serial primary key,
     mf_code text not null unique,
     mf_name text not null unique,
     amc text not null,
