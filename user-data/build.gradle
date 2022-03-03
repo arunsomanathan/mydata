@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.StringBufferWriter
+
 plugins {
 	id 'com.mydata.springboot-webflux-conventions'
 }
@@ -42,7 +44,7 @@ contractTest {
 	afterSuite { desc, result ->
 		if (!desc.parent) {
 			println "Results: (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-			boolean skipTests = Boolean.parseBoolean(project.findProperty('SKIP_TESTS') ?: "false")
+			boolean skipTests = Boolean.parseBoolean(project.findProperty('SKIP_TESTS').toString() ?: "false")
 			if (result.testCount == 0 && !skipTests) {
 				throw new IllegalStateException("No tests were found. Failing the build")
 			}
@@ -52,3 +54,44 @@ contractTest {
 
 //Disable pmdContractTest
 pmdContractTest.onlyIf { false }
+
+sourceSets {
+	sql {
+	}
+}
+
+def generateInitSql = tasks.register('generateInitSql') {
+	doLast {
+		def initTestSqlFileName = 'db-init.sql'
+		def runFirstSqlFiles = ['MutualFund.sql', 'Stock.sql']
+		def outputFile = new File(sourceSets.test.output.resourcesDir.getPath() + '/' + initTestSqlFileName)
+		//Clear File content before inserting contents
+		outputFile.text = ''
+		outputFile.withWriter {
+			writer ->
+				writer.write('--Start DB Initialization\n')
+				def orderedSql = new LinkedList<>()
+				def index = runFirstSqlFiles.size()
+				sourceSets.sql.resources.getSourceDirectories().getFiles().first().eachFileRecurse {
+					file ->
+						file.withReader {
+							reader ->
+								{
+									if (runFirstSqlFiles.contains(file.name)) {
+										orderedSql[runFirstSqlFiles.indexOf(file.name)] = reader.getText()
+									} else {
+										orderedSql[index++] = reader.getText()
+									}
+								}
+						}
+				}
+				orderedSql.each {
+					test ->
+						writer << test << '\n'
+				}
+				writer << new File(sourceSets.test.output.resourcesDir.getPath() + '/sql/' + initTestSqlFileName).newReader() << '\n'
+		}
+	}
+}
+
+processTestResources.finalizedBy(generateInitSql)
