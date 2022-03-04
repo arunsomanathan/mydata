@@ -1,3 +1,13 @@
+/*
+ * Copyright 2015-2021 the original author or authors.
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v2.0 which
+ * accompanies this distribution and is available at
+ *
+ * https://www.eclipse.org/legal/epl-v20.html
+ */
+
 package com.mydata.userdata.utils;
 
 import com.expediagroup.beans.BeanUtils;
@@ -7,19 +17,27 @@ import com.mydata.userdata.dto.MiscellaneousDto;
 import com.mydata.userdata.dto.MutualFundDto;
 import com.mydata.userdata.dto.StockDto;
 import com.mydata.userdata.entity.*;
+import com.mydata.userdata.utils.InvestmentTestArguments.Mode;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import net.datafaker.Faker;
 import net.datafaker.Finance;
 import net.datafaker.Number;
 import net.datafaker.Science;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.support.AnnotationConsumer;
 
-/** Generate Entities for test */
-public final class GenerateTestPojo {
+/** Argument provider class for Investment Tests */
+@SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+class InvestmentTestArgumentsProvider
+    implements ArgumentsProvider, AnnotationConsumer<InvestmentTestArguments> {
+  private static Integer id = 0;
 
-  private static final BeanTransformer BT = new BeanUtils().getTransformer();
   private static final Science SCIENCE_DATA = new Faker().science();
   private static final Finance FINANCE_DATA = new Faker().finance();
   private static final Number NUMBER_DATA = new Faker().number();
@@ -27,7 +45,77 @@ public final class GenerateTestPojo {
   private static final Integer MIN_VALUE = Integer.MIN_VALUE;
   private static final Integer MAX_VALUE = Integer.MAX_VALUE;
   private static final Integer ZERO_VALUE = 0;
-  private static Integer id = 0;
+
+  private transient Arguments argument;
+
+  @Override
+  public void accept(InvestmentTestArguments annotationArgs) {
+    final BeanTransformer bt = new BeanUtils().getTransformer();
+    final var firstArg = getFirstArgument(annotationArgs);
+
+    final var companionClass = annotationArgs.companion();
+    if (!void.class.equals(companionClass)) {
+      Object companion = null;
+      if (Mode.SINGLE.equals(annotationArgs.mode())) {
+        companion =
+            bt.skipTransformationForField(annotationArgs.skipFields())
+                .transform(firstArg, companionClass);
+      } else {
+        if (firstArg instanceof List<?>) {
+          companion =
+              ((List<?>) firstArg)
+                  .stream()
+                      .map(
+                          arg ->
+                              bt.skipTransformationForField(annotationArgs.skipFields())
+                                  .transform(arg, companionClass))
+                      .toList();
+        }
+      }
+      argument = Arguments.of(firstArg, companion);
+    } else {
+      argument = Arguments.of(firstArg);
+    }
+  }
+
+  /**
+   * Get the first Argument
+   *
+   * @param annotationArgs the annotation Arguments
+   * @return the first argument
+   */
+  private Object getFirstArgument(final InvestmentTestArguments annotationArgs) {
+    final var type = annotationArgs.type();
+    final var mode = annotationArgs.mode();
+    final var count = annotationArgs.count();
+    if (AccountDto.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleAccountDto() : getAccountsDto(count);
+    } else if (MiscellaneousDto.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleMiscellaneousDto() : getMiscellaneousDto(count);
+    } else if (MutualFundDto.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleMutualFundDto() : getMutualFundsDto(count);
+    } else if (StockDto.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleStockDto() : getStocksDto(count);
+    } else if (DepositAccount.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleDepositAccount() : getDepositAccounts(count);
+    } else if (Loan.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleLoanAccount() : getLoanAccounts(count);
+    } else if (Miscellaneous.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleMiscellaneous() : getMiscellaneous(count);
+    } else if (MutualFund.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleMutualFund() : getMutualFunds(count);
+    } else if (SavingAccount.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleSavingAccount() : getSavingAccounts(count);
+    } else if (Stock.class.equals(type)) {
+      return (Mode.SINGLE.equals(mode)) ? getSingleStock() : getStocks(count);
+    }
+    return null;
+  }
+
+  @Override
+  public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+    return Stream.of(argument);
+  }
 
   /**
    * Generate List of Accounts
@@ -44,7 +132,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link AccountDto}
    */
-  public static AccountDto getSingleAccountDto() {
+  private static AccountDto getSingleAccountDto() {
     return new AccountDto(
         ++id,
         SCIENCE_DATA.element(),
@@ -59,7 +147,7 @@ public final class GenerateTestPojo {
    * @param count the count of MiscellaneousDto required in the return list
    * @return {@link List<MiscellaneousDto>}
    */
-  public static List<MiscellaneousDto> getMiscellaneousDto(final Integer count) {
+  private static List<MiscellaneousDto> getMiscellaneousDto(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleMiscellaneousDto()).toList();
   }
 
@@ -68,7 +156,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link MiscellaneousDto}
    */
-  public static MiscellaneousDto getSingleMiscellaneousDto() {
+  private static MiscellaneousDto getSingleMiscellaneousDto() {
     return new MiscellaneousDto(
         ++id,
         SCIENCE_DATA.element(),
@@ -79,9 +167,9 @@ public final class GenerateTestPojo {
    * Generate List of Mutual Funds
    *
    * @param count the count of mutual funds required in the return list
-   * @return {@link MutualFundDto}
+   * @return {@link List<MutualFundDto>}
    */
-  public static List<MutualFundDto> getMutualFundsDto(final Integer count) {
+  private static List<MutualFundDto> getMutualFundsDto(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleMutualFundDto()).toList();
   }
 
@@ -90,7 +178,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link MutualFundDto}
    */
-  public static MutualFundDto getSingleMutualFundDto() {
+  private static MutualFundDto getSingleMutualFundDto() {
     return new MutualFundDto(
         ++id,
         STOCK_DATA.nsdqSymbol(),
@@ -105,7 +193,7 @@ public final class GenerateTestPojo {
    * @param count the count of stocks required in the return list
    * @return {@link List<StockDto>}
    */
-  public static List<StockDto> getStocksDto(final Integer count) {
+  private static List<StockDto> getStocksDto(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleStockDto()).toList();
   }
 
@@ -114,7 +202,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link StockDto}
    */
-  public static StockDto getSingleStockDto() {
+  private static StockDto getSingleStockDto() {
     return new StockDto(
         ++id,
         STOCK_DATA.nsdqSymbol(),
@@ -129,7 +217,7 @@ public final class GenerateTestPojo {
    * @param count the count of deposit accounts required in the return list
    * @return {@link List<DepositAccount>}
    */
-  public static List<DepositAccount> getDepositAccounts(final Integer count) {
+  private static List<DepositAccount> getDepositAccounts(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleDepositAccount()).toList();
   }
 
@@ -138,7 +226,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link DepositAccount}
    */
-  public static DepositAccount getSingleDepositAccount() {
+  private static DepositAccount getSingleDepositAccount() {
     return new DepositAccount(
         ++id,
         SCIENCE_DATA.element(),
@@ -151,31 +239,12 @@ public final class GenerateTestPojo {
   }
 
   /**
-   * Generate List of Accounts by copying from List of Objects
-   *
-   * @param accounts the list of accounts
-   * @return {@link List<AccountDto>}
-   */
-  public static List<AccountDto> getAccountsDto(final List<?> accounts) {
-    return accounts.stream().map(GenerateTestPojo::getSingleAccountDto).toList();
-  }
-
-  /**
-   * Generate Account by copying values from an Object
-   *
-   * @return {@link AccountDto}
-   */
-  public static AccountDto getSingleAccountDto(Object account) {
-    return BT.transform(account, AccountDto.class);
-  }
-
-  /**
    * Generate List of Loan Accounts
    *
    * @param count the count of loan accounts required in the return list
    * @return {@link List<Loan>}
    */
-  public static List<Loan> getLoanAccounts(final Integer count) {
+  private static List<Loan> getLoanAccounts(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleLoanAccount()).toList();
   }
 
@@ -184,7 +253,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link Loan}
    */
-  public static Loan getSingleLoanAccount() {
+  private static Loan getSingleLoanAccount() {
     return new Loan(
         ++id,
         SCIENCE_DATA.element(),
@@ -202,7 +271,7 @@ public final class GenerateTestPojo {
    * @param count the count of saving accounts required in the return list
    * @return {@link List<SavingAccount>}
    */
-  public static List<SavingAccount> getSavingAccounts(final Integer count) {
+  private static List<SavingAccount> getSavingAccounts(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleSavingAccount()).toList();
   }
 
@@ -211,7 +280,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link SavingAccount}
    */
-  public static SavingAccount getSingleSavingAccount() {
+  private static SavingAccount getSingleSavingAccount() {
     return new SavingAccount(
         ++id,
         SCIENCE_DATA.element(),
@@ -229,7 +298,7 @@ public final class GenerateTestPojo {
    * @param count the count of miscellaneous accounts required in the return list
    * @return {@link List<Miscellaneous>}
    */
-  public static List<Miscellaneous> getMiscellaneous(final Integer count) {
+  private static List<Miscellaneous> getMiscellaneous(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleMiscellaneous()).toList();
   }
 
@@ -238,7 +307,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link Miscellaneous}
    */
-  public static Miscellaneous getSingleMiscellaneous() {
+  private static Miscellaneous getSingleMiscellaneous() {
     return new Miscellaneous(
         ++id,
         SCIENCE_DATA.element(),
@@ -249,32 +318,12 @@ public final class GenerateTestPojo {
   }
 
   /**
-   * Generate List of Miscellaneous DTO by copying from List of Miscellaneous
-   *
-   * @param miscellaneous {@link List<Miscellaneous>}
-   * @return {@link List<MiscellaneousDto>}
-   */
-  public static List<MiscellaneousDto> getMiscellaneousDto(
-      final List<Miscellaneous> miscellaneous) {
-    return miscellaneous.stream().map(GenerateTestPojo::getSingleMiscellaneousDto).toList();
-  }
-
-  /**
-   * Generate Miscellaneous DTO by copying from Miscellaneous object
-   *
-   * @return {@link MiscellaneousDto}
-   */
-  public static MiscellaneousDto getSingleMiscellaneousDto(Miscellaneous miscellaneous) {
-    return BT.transform(miscellaneous, MiscellaneousDto.class);
-  }
-
-  /**
    * Generate List of MutualFunds
    *
    * @param count the count of Mutual Funds required in the return list
    * @return {@link List<MutualFund>}
    */
-  public static List<MutualFund> getMutualFunds(final Integer count) {
+  private static List<MutualFund> getMutualFunds(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleMutualFund()).toList();
   }
 
@@ -283,7 +332,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link MutualFund}
    */
-  public static MutualFund getSingleMutualFund() {
+  private static MutualFund getSingleMutualFund() {
     return new MutualFund(
         ++id,
         STOCK_DATA.nsdqSymbol(),
@@ -296,32 +345,12 @@ public final class GenerateTestPojo {
   }
 
   /**
-   * Generate List of MutualFund DTO from List of MutualFund objects
-   *
-   * @param mutualFund {@link List<MutualFund>}
-   * @return {@link List<MutualFundDto>}
-   */
-  public static List<MutualFundDto> getMutualFundsDto(final List<MutualFund> mutualFund) {
-    return mutualFund.stream().map(GenerateTestPojo::getSingleMutualFundDto).toList();
-  }
-
-  /**
-   * Generate MutualFund DTO by copying from MutualFund object
-   *
-   * @param mutualFund the {@link MutualFund}
-   * @return {@link MutualFundDto}
-   */
-  public static MutualFundDto getSingleMutualFundDto(MutualFund mutualFund) {
-    return BT.transform(mutualFund, MutualFundDto.class);
-  }
-
-  /**
    * Generate List of Stocks
    *
    * @param count the count of Stocks required in the return list
    * @return {@link List<Stock>}
    */
-  public static List<Stock> getStocks(final Integer count) {
+  private static List<Stock> getStocks(final Integer count) {
     return IntStream.range(0, count).mapToObj(i -> getSingleStock()).toList();
   }
 
@@ -330,7 +359,7 @@ public final class GenerateTestPojo {
    *
    * @return {@link Stock}
    */
-  public static Stock getSingleStock() {
+  private static Stock getSingleStock() {
     return new Stock(
         ++id,
         STOCK_DATA.nsdqSymbol(),
@@ -340,25 +369,5 @@ public final class GenerateTestPojo {
         Instant.now(),
         Instant.now(),
         false);
-  }
-
-  /**
-   * Generate List of Stock DTO from List of Stock objects
-   *
-   * @param stocks {@link List<Stock>}
-   * @return {@link List<StockDto>}
-   */
-  public static List<StockDto> getStocksDto(final List<Stock> stocks) {
-    return stocks.stream().map(GenerateTestPojo::getStockDto).toList();
-  }
-
-  /**
-   * Generate Stock DTO by copying from Stock object
-   *
-   * @param stock the {@link Stock}
-   * @return {@link StockDto}
-   */
-  public static StockDto getStockDto(Stock stock) {
-    return BT.transform(stock, StockDto.class);
   }
 }
