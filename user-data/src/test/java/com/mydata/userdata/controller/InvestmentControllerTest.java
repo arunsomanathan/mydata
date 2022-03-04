@@ -11,13 +11,13 @@ import com.mydata.userdata.dto.MiscellaneousDto;
 import com.mydata.userdata.dto.MutualFundDto;
 import com.mydata.userdata.dto.StockDto;
 import com.mydata.userdata.service.InvestmentService;
-import com.mydata.userdata.utils.GenerateTestPojo;
+import com.mydata.userdata.utils.InvestmentTestArguments;
+import com.mydata.userdata.utils.InvestmentTestArguments.Mode;
 import com.mydata.utilities.test.conroller.ControllerTest;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -56,22 +56,27 @@ class InvestmentControllerTest implements ControllerTest {
     verifyNoMoreInteractions(investmentService);
   }
 
-  /** Test for {@link InvestmentController#getDepositAccounts()} */
-  @ParameterizedTest
-  @ValueSource(ints = 10)
-  @DisplayName("Happy Path: Controller: Get Deposit Accounts")
-  void getDepositAccounts(final int count) {
-    var accounts = GenerateTestPojo.getAccountsDto(count);
+  /**
+   * Test for {@link InvestmentController#getDepositAccounts()}
+   *
+   * @param accounts list of expected deposit accounts
+   */
+  @ParameterizedTest(name = "Happy Path: Controller: Get Deposit Accounts")
+  @InvestmentTestArguments(type = AccountDto.class, mode = Mode.LIST)
+  void getDepositAccounts(final List<AccountDto> accounts) {
     when(investmentService.getDepositAccounts()).thenReturn(Flux.fromIterable(accounts));
     verifyGetAndDocument(DEPOSIT_ACCOUNTS_URL, accounts, AccountDto.class);
     verify(investmentService, times(1)).getDepositAccounts();
   }
 
-  /** Test for {@link InvestmentController#addDepositAccount(AccountDto)} */
-  @Test
-  @DisplayName("Happy Path: Add Deposit Account")
-  void addDepositAccount() {
-    var depositAccount = GenerateTestPojo.getSingleAccountDto();
+  /**
+   * Test for {@link InvestmentController#addDepositAccount(AccountDto)}
+   *
+   * @param depositAccount the expected deposit account
+   */
+  @ParameterizedTest(name = "Happy Path: Add Deposit Account")
+  @InvestmentTestArguments(type = AccountDto.class)
+  void addDepositAccount(final AccountDto depositAccount) {
     when(investmentService.addDepositAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(depositAccount));
     verifyPostAndDocument(
@@ -82,22 +87,27 @@ class InvestmentControllerTest implements ControllerTest {
     verify(investmentService, times(1)).addDepositAccount(any(AccountDto.class));
   }
 
-  /** Test for {@link InvestmentController#getLoanAccounts()} */
-  @ParameterizedTest
-  @ValueSource(ints = 10)
-  @DisplayName("Happy Path: Get Loan Accounts")
-  void getLoanAccounts(final int count) {
-    var accounts = GenerateTestPojo.getAccountsDto(count);
+  /**
+   * Test for {@link InvestmentController#getLoanAccounts()}
+   *
+   * @param accounts list of expected loan accounts
+   */
+  @ParameterizedTest(name = "Happy Path: Get Loan Accounts")
+  @InvestmentTestArguments(type = AccountDto.class, mode = Mode.LIST)
+  void getLoanAccounts(final List<AccountDto> accounts) {
     when(investmentService.getLoanAccounts()).thenReturn(Flux.fromIterable(accounts));
     verifyGetAndDocument(LOAN_ACCOUNTS_URL, accounts, AccountDto.class);
     verify(investmentService, times(1)).getLoanAccounts();
   }
 
-  /** Test for {@link InvestmentController#addLoanAccount(AccountDto)} */
-  @Test
-  @DisplayName("Happy Path: Add Loan Account")
-  void addLoanAccount() {
-    var loanAccount = GenerateTestPojo.getSingleAccountDto();
+  /**
+   * Test for {@link InvestmentController#addLoanAccount(AccountDto)}
+   *
+   * @param loanAccount the expected loan account
+   */
+  @ParameterizedTest(name = "Happy Path: Add Loan Account")
+  @InvestmentTestArguments(type = AccountDto.class)
+  void addLoanAccount(final AccountDto loanAccount) {
     when(investmentService.addLoanAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(loanAccount));
     verifyPostAndDocument(
@@ -108,24 +118,27 @@ class InvestmentControllerTest implements ControllerTest {
     verify(investmentService, times(1)).addLoanAccount(any(AccountDto.class));
   }
 
-  /** Test for {@link InvestmentController#getMiscellaneousAccounts()} */
-  @ParameterizedTest
-  @ValueSource(ints = 10)
-  @DisplayName("Happy Path: Get Miscellaneous Accounts")
-  void getMiscellaneousAccounts(final int count) {
-    var accounts = GenerateTestPojo.getMiscellaneousDto(count);
+  /**
+   * Test for {@link InvestmentController#getMiscellaneousAccounts()}
+   *
+   * @param accounts list of expected miscellaneous accounts
+   */
+  @ParameterizedTest(name = "Happy Path: Get Miscellaneous Accounts")
+  @InvestmentTestArguments(type = MiscellaneousDto.class, mode = Mode.LIST)
+  void getMiscellaneousAccounts(final List<MiscellaneousDto> accounts) {
     when(investmentService.getMiscellaneousAccounts()).thenReturn(Flux.fromIterable(accounts));
     verifyGetAndDocument(MISCELLANEOUS_ACCOUNTS_URL, accounts, MiscellaneousDto.class);
     verify(investmentService, times(1)).getMiscellaneousAccounts();
   }
 
   /**
-   * Test for {@link InvestmentController#addMiscellaneousAccount(MiscellaneousDto)} (AccountDto)}
+   * Test for {@link InvestmentController#addMiscellaneousAccount(MiscellaneousDto)}
+   *
+   * @param miscellaneousDto the expected miscellaneous dto
    */
-  @Test
-  @DisplayName("Happy Path: Add Miscellaneous Account")
-  void addMiscellaneousAccount() {
-    var miscellaneousDto = GenerateTestPojo.getSingleMiscellaneousDto();
+  @ParameterizedTest(name = "Happy Path: Add Miscellaneous Account")
+  @InvestmentTestArguments(type = MiscellaneousDto.class)
+  void addMiscellaneousAccount(final MiscellaneousDto miscellaneousDto) {
     when(investmentService.addMiscellaneousAccount(any(MiscellaneousDto.class)))
         .thenReturn(Mono.just(miscellaneousDto));
     verifyPostAndDocument(
@@ -136,22 +149,27 @@ class InvestmentControllerTest implements ControllerTest {
     verify(investmentService, times(1)).addMiscellaneousAccount(any(MiscellaneousDto.class));
   }
 
-  /** Test for {@link InvestmentController#getMutualFunds()} */
-  @ParameterizedTest
-  @ValueSource(ints = 10)
-  @DisplayName("Happy Path: Get Mutual Funds")
-  void getMutualFunds(final int count) {
-    var mutualFunds = GenerateTestPojo.getMutualFundsDto(count);
+  /**
+   * Test for {@link InvestmentController#getMutualFunds()}
+   *
+   * @param mutualFunds list of expected mutual funds
+   */
+  @ParameterizedTest(name = "Happy Path: Get Mutual Funds")
+  @InvestmentTestArguments(type = MutualFundDto.class, mode = Mode.LIST)
+  void getMutualFunds(final List<MutualFundDto> mutualFunds) {
     when(investmentService.getMutualFunds()).thenReturn(Flux.fromIterable(mutualFunds));
     verifyGetAndDocument(MUTUAL_FUNDS_URL, mutualFunds, MutualFundDto.class);
     verify(investmentService, times(1)).getMutualFunds();
   }
 
-  /** Test for {@link InvestmentController#addMutualFund(MutualFundDto)} */
-  @Test
-  @DisplayName("Happy Path: Add Mutual Fund")
-  void addMutualFund() {
-    var mutualFundDto = GenerateTestPojo.getSingleMutualFundDto();
+  /**
+   * Test for {@link InvestmentController#addMutualFund(MutualFundDto)}
+   *
+   * @param mutualFundDto the expected mutual fund dto
+   */
+  @ParameterizedTest(name = "Happy Path: Add Mutual Fund")
+  @InvestmentTestArguments(type = MutualFundDto.class)
+  void addMutualFund(final MutualFundDto mutualFundDto) {
     when(investmentService.addMutualFund(any(MutualFundDto.class)))
         .thenReturn(Mono.just(mutualFundDto));
     verifyPostAndDocument(
@@ -162,22 +180,27 @@ class InvestmentControllerTest implements ControllerTest {
     verify(investmentService, times(1)).addMutualFund(any(MutualFundDto.class));
   }
 
-  /** Test for {@link InvestmentController#getSavingAccounts()} */
-  @ParameterizedTest
-  @ValueSource(ints = 10)
-  @DisplayName("Happy Path: Get Saving Accounts")
-  void getSavingAccounts(final int count) {
-    var accounts = GenerateTestPojo.getAccountsDto(count);
+  /**
+   * Test for {@link InvestmentController#getSavingAccounts()}
+   *
+   * @param accounts list of expected saving accounts
+   */
+  @ParameterizedTest(name = "Happy Path: Get Saving Accounts")
+  @InvestmentTestArguments(type = AccountDto.class, mode = Mode.LIST)
+  void getSavingAccounts(final List<AccountDto> accounts) {
     when(investmentService.getSavingAccounts()).thenReturn(Flux.fromIterable(accounts));
     verifyGetAndDocument(SAVING_ACCOUNTS_URL, accounts, AccountDto.class);
     verify(investmentService, times(1)).getSavingAccounts();
   }
 
-  /** Test for {@link InvestmentController#addSavingAccount(AccountDto)} */
-  @Test
-  @DisplayName("Happy Path: Add Saving Account")
-  void addSavingAccount() {
-    var savingAccountDto = GenerateTestPojo.getSingleAccountDto();
+  /**
+   * Test for {@link InvestmentController#addSavingAccount(AccountDto)}
+   *
+   * @param savingAccountDto the expected saving account dto
+   */
+  @ParameterizedTest(name = "Happy Path: Add Saving Account")
+  @InvestmentTestArguments(type = AccountDto.class)
+  void addSavingAccount(final AccountDto savingAccountDto) {
     when(investmentService.addSavingAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(savingAccountDto));
     verifyPostAndDocument(
@@ -188,25 +211,30 @@ class InvestmentControllerTest implements ControllerTest {
     verify(investmentService, times(1)).addSavingAccount(any(AccountDto.class));
   }
 
-  /** Test for {@link InvestmentController#getStocks()} */
-  @ParameterizedTest
-  @ValueSource(ints = 10)
-  @DisplayName("Happy Path: Get Saving Accounts")
-  void getStocks(final int count) {
-    var stocks = GenerateTestPojo.getStocksDto(count);
+  /**
+   * Test for {@link InvestmentController#getStocks()}
+   *
+   * @param stocks list of expected stocks
+   */
+  @ParameterizedTest(name = "Happy Path: Get Saving Accounts")
+  @InvestmentTestArguments(type = StockDto.class, mode = Mode.LIST)
+  void getStocks(final List<StockDto> stocks) {
     when(investmentService.getStocks()).thenReturn(Flux.fromIterable(stocks));
     verifyGetAndDocument(STOCKS_URL, stocks, StockDto.class);
     verify(investmentService, times(1)).getStocks();
   }
 
-  /** Test for {@link InvestmentController#addStock(StockDto)} */
-  @Test
-  @DisplayName("Happy Path: Add Stock")
-  void addStock() {
-    var stocksDto = GenerateTestPojo.getSingleStockDto();
-    when(investmentService.addStock(any(StockDto.class))).thenReturn(Mono.just(stocksDto));
+  /**
+   * Test for {@link InvestmentController#addStock(StockDto)}
+   *
+   * @param stockDto the expected stock dto
+   */
+  @ParameterizedTest(name = "Happy Path: Add Stock")
+  @InvestmentTestArguments(type = StockDto.class)
+  void addStock(final StockDto stockDto) {
+    when(investmentService.addStock(any(StockDto.class))).thenReturn(Mono.just(stockDto));
     verifyPostAndDocument(
-        STOCKS_URL, dtoToDtoSkipId.transform(stocksDto, StockDto.class), stocksDto, StockDto.class);
+        STOCKS_URL, dtoToDtoSkipId.transform(stockDto, StockDto.class), stockDto, StockDto.class);
     verify(investmentService, times(1)).addStock(any(StockDto.class));
   }
 }

@@ -1,5 +1,3 @@
-import org.codehaus.groovy.runtime.StringBufferWriter
-
 plugins {
 	id 'com.mydata.springboot-webflux-conventions'
 }
@@ -10,13 +8,11 @@ sourceCompatibility = '17'
 
 dependencies {
 	implementation project(":utilities")
-	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	implementation 'io.r2dbc:r2dbc-postgresql'
-
-	testRuntimeOnly 'org.postgresql:postgresql'
-
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'org.testcontainers:r2dbc'
+	testRuntimeOnly 'org.postgresql:postgresql'
 }
 
 ext {
