@@ -49,10 +49,20 @@ class InvestmentServiceTest {
    * Step Verifier
    *
    * @param publisher the publisher to be tested
-   * @param dto the expected dto objects
+   * @param expectedList the expected list of objects
    */
-  private static <T> void stepVerify(Publisher<T> publisher, T... dto) {
-    StepVerifier.create(publisher).expectNext(dto).verifyComplete();
+  private static <T> void stepVerify(Publisher<T> publisher, Iterable<T> expectedList) {
+    StepVerifier.create(publisher).expectNextSequence(expectedList).verifyComplete();
+  }
+
+  /**
+   * Step Verifier
+   *
+   * @param publisher the publisher to be tested
+   * @param expected the expected object
+   */
+  private static <T> void stepVerify(Publisher<T> publisher, T expected) {
+    stepVerify(publisher, List.of(expected));
   }
 
   /**
@@ -69,7 +79,7 @@ class InvestmentServiceTest {
   void getDepositAccounts(
       final List<DepositAccount> depositAccounts, final List<AccountDto> expectedResult) {
     when(daRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(depositAccounts));
-    stepVerify(investService.getDepositAccounts().log(), expectedResult.toArray(new AccountDto[0]));
+    stepVerify(investService.getDepositAccounts(), expectedResult);
     verify(daRepo, times(1)).findByActive(Boolean.TRUE);
   }
 
@@ -83,7 +93,7 @@ class InvestmentServiceTest {
   @InvestmentTestArguments(type = DepositAccount.class, companion = AccountDto.class)
   void addDepositAccount(final DepositAccount depositAccount, final AccountDto expectedResult) {
     when(daRepo.save(any(DepositAccount.class))).thenReturn(Mono.just(depositAccount));
-    stepVerify(investService.addDepositAccount(expectedResult).log(), expectedResult);
+    stepVerify(investService.addDepositAccount(expectedResult), expectedResult);
     verify(daRepo, times(1)).save(any(DepositAccount.class));
   }
 
@@ -97,7 +107,7 @@ class InvestmentServiceTest {
   @InvestmentTestArguments(type = Loan.class, mode = Mode.LIST, companion = AccountDto.class)
   void getLoanAccounts(final List<Loan> loanAccounts, final List<AccountDto> expectedResult) {
     when(loanRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(loanAccounts));
-    stepVerify(investService.getLoanAccounts().log(), expectedResult.toArray(new AccountDto[0]));
+    stepVerify(investService.getLoanAccounts(), expectedResult);
     verify(loanRepo, times(1)).findByActive(Boolean.TRUE);
   }
 
@@ -111,7 +121,7 @@ class InvestmentServiceTest {
   @InvestmentTestArguments(type = Loan.class, companion = AccountDto.class)
   void addLoanAccount(final Loan loanAccount, final AccountDto expectedResult) {
     when(loanRepo.save(any(Loan.class))).thenReturn(Mono.just(loanAccount));
-    stepVerify(investService.addLoanAccount(expectedResult).log(), expectedResult);
+    stepVerify(investService.addLoanAccount(expectedResult), expectedResult);
     verify(loanRepo, times(1)).save(any(Loan.class));
   }
 
@@ -129,8 +139,7 @@ class InvestmentServiceTest {
   void getMiscellaneousAccounts(
       final List<Miscellaneous> miscAccounts, final List<MiscellaneousDto> expectedResult) {
     when(miscRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(miscAccounts));
-    stepVerify(
-        investService.getMiscellaneousAccounts(), expectedResult.toArray(new MiscellaneousDto[0]));
+    stepVerify(investService.getMiscellaneousAccounts(), expectedResult);
     verify(miscRepo, times(1)).findByActive(Boolean.TRUE);
   }
 
@@ -145,7 +154,7 @@ class InvestmentServiceTest {
   void addMiscellaneousAccount(
       final Miscellaneous miscAccounts, final MiscellaneousDto expectedResult) {
     when(miscRepo.save(any(Miscellaneous.class))).thenReturn(Mono.just(miscAccounts));
-    stepVerify(investService.addMiscellaneousAccount(expectedResult).log(), expectedResult);
+    stepVerify(investService.addMiscellaneousAccount(expectedResult), expectedResult);
     verify(miscRepo, times(1)).save(any(Miscellaneous.class));
   }
 
@@ -163,7 +172,7 @@ class InvestmentServiceTest {
   void getMutualFunds(
       final List<MutualFund> mutualFunds, final List<MutualFundDto> expectedResult) {
     when(mfRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(mutualFunds));
-    stepVerify(investService.getMutualFunds(), expectedResult.toArray(new MutualFundDto[0]));
+    stepVerify(investService.getMutualFunds(), expectedResult);
     verify(mfRepo, times(1)).findByActive(Boolean.TRUE);
   }
 
@@ -177,7 +186,7 @@ class InvestmentServiceTest {
   @InvestmentTestArguments(type = MutualFund.class, companion = MutualFundDto.class)
   void addMutualFund(final MutualFund mutualFund, final MutualFundDto expectedResult) {
     when(mfRepo.save(any(MutualFund.class))).thenReturn(Mono.just(mutualFund));
-    stepVerify(investService.addMutualFund(expectedResult).log(), expectedResult);
+    stepVerify(investService.addMutualFund(expectedResult), expectedResult);
     verify(mfRepo, times(1)).save(any(MutualFund.class));
   }
 
@@ -195,7 +204,7 @@ class InvestmentServiceTest {
   void getSavingAccounts(
       final List<SavingAccount> savingAccounts, final List<AccountDto> expectedResult) {
     when(saRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(savingAccounts));
-    stepVerify(investService.getSavingAccounts(), expectedResult.toArray(new AccountDto[0]));
+    stepVerify(investService.getSavingAccounts(), expectedResult);
     verify(saRepo, times(1)).findByActive(Boolean.TRUE);
   }
 
@@ -209,7 +218,7 @@ class InvestmentServiceTest {
   @InvestmentTestArguments(type = SavingAccount.class, companion = AccountDto.class)
   void addSavingAccount(final SavingAccount savingAccount, final AccountDto expectedResult) {
     when(saRepo.save(any(SavingAccount.class))).thenReturn(Mono.just(savingAccount));
-    stepVerify(investService.addSavingAccount(expectedResult).log(), expectedResult);
+    stepVerify(investService.addSavingAccount(expectedResult), expectedResult);
     verify(saRepo, times(1)).save(any(SavingAccount.class));
   }
 
@@ -223,7 +232,7 @@ class InvestmentServiceTest {
   @InvestmentTestArguments(type = Stock.class, mode = Mode.LIST, companion = StockDto.class)
   void getStocks(final List<Stock> stocks, final List<StockDto> expectedResult) {
     when(stockRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stocks));
-    stepVerify(investService.getStocks(), expectedResult.toArray(new StockDto[0]));
+    stepVerify(investService.getStocks(), expectedResult);
     verify(stockRepo, times(1)).findByActive(Boolean.TRUE);
   }
 
@@ -237,7 +246,7 @@ class InvestmentServiceTest {
   @InvestmentTestArguments(type = Stock.class, companion = StockDto.class)
   void addStock(final Stock stock, final StockDto expectedResult) {
     when(stockRepo.save(any(Stock.class))).thenReturn(Mono.just(stock));
-    stepVerify(investService.addStock(expectedResult).log(), expectedResult);
+    stepVerify(investService.addStock(expectedResult), expectedResult);
     verify(stockRepo, times(1)).save(any(Stock.class));
   }
 }

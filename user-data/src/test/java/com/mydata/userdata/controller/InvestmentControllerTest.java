@@ -57,6 +57,18 @@ class InvestmentControllerTest implements ControllerTest {
   }
 
   /**
+   * Verify Post request and document
+   *
+   * @param url the request url
+   * @param expected the expected object
+   * @param expectedType the expected object type
+   * @param <T> Type of expected objet
+   */
+  private <T> void verifyPostAndDocument(String url, T expected, Class<T> expectedType) {
+    verifyPost(url, dtoToDtoSkipId.transform(expected, expectedType), expected, expectedType);
+  }
+
+  /**
    * Test for {@link InvestmentController#getDepositAccounts()}
    *
    * @param accounts list of expected deposit accounts
@@ -79,11 +91,7 @@ class InvestmentControllerTest implements ControllerTest {
   void addDepositAccount(final AccountDto depositAccount) {
     when(investmentService.addDepositAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(depositAccount));
-    verifyPostAndDocument(
-        DEPOSIT_ACCOUNTS_URL,
-        dtoToDtoSkipId.transform(depositAccount, AccountDto.class),
-        depositAccount,
-        AccountDto.class);
+    verifyPostAndDocument(DEPOSIT_ACCOUNTS_URL, depositAccount, AccountDto.class);
     verify(investmentService, times(1)).addDepositAccount(any(AccountDto.class));
   }
 
@@ -110,11 +118,7 @@ class InvestmentControllerTest implements ControllerTest {
   void addLoanAccount(final AccountDto loanAccount) {
     when(investmentService.addLoanAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(loanAccount));
-    verifyPostAndDocument(
-        LOAN_ACCOUNTS_URL,
-        dtoToDtoSkipId.transform(loanAccount, AccountDto.class),
-        loanAccount,
-        AccountDto.class);
+    verifyPostAndDocument(LOAN_ACCOUNTS_URL, loanAccount, AccountDto.class);
     verify(investmentService, times(1)).addLoanAccount(any(AccountDto.class));
   }
 
@@ -141,11 +145,7 @@ class InvestmentControllerTest implements ControllerTest {
   void addMiscellaneousAccount(final MiscellaneousDto miscellaneousDto) {
     when(investmentService.addMiscellaneousAccount(any(MiscellaneousDto.class)))
         .thenReturn(Mono.just(miscellaneousDto));
-    verifyPostAndDocument(
-        MISCELLANEOUS_ACCOUNTS_URL,
-        dtoToDtoSkipId.transform(miscellaneousDto, MiscellaneousDto.class),
-        miscellaneousDto,
-        MiscellaneousDto.class);
+    verifyPostAndDocument(MISCELLANEOUS_ACCOUNTS_URL, miscellaneousDto, MiscellaneousDto.class);
     verify(investmentService, times(1)).addMiscellaneousAccount(any(MiscellaneousDto.class));
   }
 
@@ -172,11 +172,7 @@ class InvestmentControllerTest implements ControllerTest {
   void addMutualFund(final MutualFundDto mutualFundDto) {
     when(investmentService.addMutualFund(any(MutualFundDto.class)))
         .thenReturn(Mono.just(mutualFundDto));
-    verifyPostAndDocument(
-        MUTUAL_FUNDS_URL,
-        dtoToDtoSkipId.transform(mutualFundDto, MutualFundDto.class),
-        mutualFundDto,
-        MutualFundDto.class);
+    verifyPostAndDocument(MUTUAL_FUNDS_URL, mutualFundDto, MutualFundDto.class);
     verify(investmentService, times(1)).addMutualFund(any(MutualFundDto.class));
   }
 
@@ -203,11 +199,7 @@ class InvestmentControllerTest implements ControllerTest {
   void addSavingAccount(final AccountDto savingAccountDto) {
     when(investmentService.addSavingAccount(any(AccountDto.class)))
         .thenReturn(Mono.just(savingAccountDto));
-    verifyPostAndDocument(
-        SAVING_ACCOUNTS_URL,
-        dtoToDtoSkipId.transform(savingAccountDto, AccountDto.class),
-        savingAccountDto,
-        AccountDto.class);
+    verifyPostAndDocument(SAVING_ACCOUNTS_URL, savingAccountDto, AccountDto.class);
     verify(investmentService, times(1)).addSavingAccount(any(AccountDto.class));
   }
 
