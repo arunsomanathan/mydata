@@ -152,8 +152,8 @@ public interface ControllerTest {
    * @param dto the dto objects
    * @param dtoClass the dto object class
    */
-  default <T, D> void verifyPost(
-      final String apiUrl, final T requestObj, final D dto, final Class<D> dtoClass) {
+  default <V, T> void verifyPost(
+      final String apiUrl, final V requestObj, final T dto, final Class<T> dtoClass) {
     verifyPost(apiUrl, requestObj, dto, dtoClass, Boolean.FALSE);
   }
 
@@ -166,11 +166,11 @@ public interface ControllerTest {
    * @param dtoClass the dto object class
    * @param genDoc if true generate documentation
    */
-  default <T, D> void verifyPost(
+  default <V, T> void verifyPost(
       final String apiUrl,
-      final T requestObj,
-      final D dto,
-      final Class<D> dtoClass,
+      final V requestObj,
+      final T dto,
+      final Class<T> dtoClass,
       final Boolean genDoc) {
     post(apiUrl, requestObj)
         .expectAll(
