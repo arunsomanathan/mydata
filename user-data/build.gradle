@@ -23,6 +23,7 @@ application {
 	mainClass = 'com.mydata.userdata.UserDataApplication'
 }
 
+
 def jacocoExlude = ['com.mydata.userdata.UserDataApplication', 'com.mydata.userdata.entity.*']
 jacocoTestCoverageVerification.violationRules(vr -> vr.rules.forEach(rule -> rule.excludes = jacocoExlude))
 

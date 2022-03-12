@@ -5,7 +5,7 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(POST())
-        urlPath('/investment/stocks')
+        urlPath('/investments/stocks')
         body([
                 "id"           : null,
                 "stockCode"    : "Stock Code",
@@ -20,7 +20,7 @@ Contract.make {
     response {
         status(OK())
         body([
-                "id"            : $(anyPositiveInt()),
+                "id"           : $(anyPositiveInt()),
                 "stockCode"    : "Stock Code",
                 "stockName"    : "Stock Name",
                 "stockExchange": "Stock Exchange",

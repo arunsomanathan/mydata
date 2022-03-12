@@ -1,36 +1,43 @@
 spring:
   application:
-    name: "user-data"
+    name: user-data
   output:
     ansi:
-      enabled: "always"
+      enabled: always
 
 server:
+  ssl:
+    enabled: false
+    key-store-type: PKCS12
+    key-store: classpath:ssl/localhost.p12
+    key-store-password: sslarun
+    key-alias: localhost
   http2:
-    enabled: "true"
+    enabled: true
 
 logging:
   level:
-    root: "debug"
+    root: debug
 
 management:
   endpoints:
     web:
       exposure:
         include:
-          - "health"
-          - "info"
-          - "metrics"
+          - health
+          - info
+          - metrics
   metrics:
     tags:
-      application: "user-data"
+      application: user-data
 db:
-  driver: "postgresql"
-  host: "localhost"
-  port: "5432"
-  user: "arun"
-  password: "arun"
-  database: "mydata"
-  schema: "mydata"
+  postgresql:
+    driver: postgresql
+    host: localhost
+    port: 5432
+    user: arun
+    password: arun
+    database: mydata
+    schema: mydata
 
 

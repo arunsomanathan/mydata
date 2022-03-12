@@ -5,13 +5,13 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(POST())
-        urlPath('/investment/loanaccounts')
+        urlPath('/investments/loanaccounts')
         body([
                 "id"           : null,
                 "bankName"     : "Bank Name",
                 "branch"       : "Branch Name",
                 "accountNumber": "AccountNumber",
-                "balance"      : $(anyDouble())
+                "balance"      : $(regex("-(\\d*\\.\\d+)"))
         ])
         headers {
             contentType(applicationJson())
@@ -24,7 +24,7 @@ Contract.make {
                 "bankName"     : "Bank Name",
                 "branch"       : "Branch Name",
                 "accountNumber": "AccountNumber",
-                "balance"      : $(anyDouble())
+                "balance"      : $(regex("-(\\d*\\.\\d+)"))
         ])
         headers {
             contentType(applicationJson())

@@ -5,7 +5,7 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(GET())
-        urlPath('/investment/mutualfunds')
+        urlPath('/investments/mutualfunds')
         headers {
             contentType(applicationJson())
         }
@@ -13,7 +13,7 @@ Contract.make {
     response {
         status(OK())
         body([
-                "id"            : $(anyPositiveInt()),
+                "id"    : $(anyPositiveInt()),
                 "mfCode": $(anyNonBlankString()),
                 "mfName": $(anyNonBlankString()),
                 "amc"   : $(anyNonBlankString()),

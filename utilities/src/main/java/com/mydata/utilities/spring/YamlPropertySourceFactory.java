@@ -10,17 +10,19 @@ import org.springframework.lang.NonNull;
 import java.util.Objects;
 import java.util.Properties;
 
-/** For reading the Yaml properties file */
+/**
+ * For reading the Yaml properties file
+ */
 public final class YamlPropertySourceFactory implements PropertySourceFactory {
 
-  @Override
-  @NonNull
-  public PropertySource<?> createPropertySource(String name, EncodedResource encodedResource) {
-    YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-    factory.setResources(encodedResource.getResource());
-    Properties properties = factory.getObject();
-    return new PropertiesPropertySource(
-        Objects.requireNonNull(encodedResource.getResource().getFilename()),
-        Objects.requireNonNull(properties));
-  }
+	@Override
+	@NonNull
+	public PropertySource<?> createPropertySource(String name, EncodedResource encodedResource) {
+		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+		factory.setResources(encodedResource.getResource());
+		Properties properties = factory.getObject();
+		return new PropertiesPropertySource(
+						Objects.requireNonNull(encodedResource.getResource().getFilename()),
+						Objects.requireNonNull(properties));
+	}
 }

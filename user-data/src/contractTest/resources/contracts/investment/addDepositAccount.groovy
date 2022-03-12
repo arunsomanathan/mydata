@@ -5,7 +5,7 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(POST())
-        urlPath('/investment/depositaccounts')
+        urlPath('/investments/depositaccounts')
         body([
                 "id"           : null,
                 "bankName"     : "Bank Name",
