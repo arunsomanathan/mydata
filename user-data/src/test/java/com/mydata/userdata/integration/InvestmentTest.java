@@ -1,31 +1,27 @@
 package com.mydata.userdata.integration;
 
+import static com.mydata.userdata.common.ApiNames.*;
+import static com.mydata.userdata.common.ApiUrls.INVESTMENT_BASE_URL;
 import static com.mydata.userdata.common.ObjectProperties.ACCOUNT_ID;
-import static com.mydata.userdata.common.URLs.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.mydata.userdata.common.TestConstants.API_NAME_URL_MAP;
 
 import com.expediagroup.beans.BeanUtils;
 import com.expediagroup.beans.transformer.BeanTransformer;
 import com.mydata.userdata.controller.InvestmentController;
-import com.mydata.userdata.dto.AccountDto;
-import com.mydata.userdata.dto.MiscellaneousDto;
-import com.mydata.userdata.dto.MutualFundDto;
-import com.mydata.userdata.dto.StockDto;
-import com.mydata.userdata.utils.InvestmentTestArguments;
-import com.mydata.utilities.test.conroller.ControllerTest;
-import java.util.Objects;
+import com.mydata.userdata.dto.*;
+import com.mydata.userdata.utils.InvestmentParameterResolver;
+import com.mydata.userdata.utils.NegativeBalance;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "server.port=0")
+    properties = {"server.port=0", "server.ssl.enabled=false"})
+@ExtendWith(InvestmentParameterResolver.class)
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
-class InvestmentTest extends IntegrationTestBase implements ControllerTest {
-
-  public static final int MIN_RECORDS_RESULT = 5;
+class InvestmentTest extends IntegrationTestBase {
 
   private final BeanTransformer dtoToDtoSkipId =
       new BeanUtils().getTransformer().skipTransformationForField(ACCOUNT_ID);
@@ -35,279 +31,174 @@ class InvestmentTest extends IntegrationTestBase implements ControllerTest {
     return INVESTMENT_BASE_URL;
   }
 
+  @Override
+  public String getApiUrlFromApiName(final String apiName) {
+    return API_NAME_URL_MAP.get(apiName);
+  }
+
   /** Test for {@link InvestmentController#getDepositAccounts()} */
   @Test
   @DisplayName("Happy Path: Get Deposit Accounts")
   void getDepositAccounts() {
-    get(DEPOSIT_ACCOUNTS_URL)
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBodyList(AccountDto.class)
-                    .consumeWith(
-                        r ->
-                            assertTrue(
-                                Objects.requireNonNull(r.getResponseBody()).size()
-                                    >= MIN_RECORDS_RESULT)));
+    verifyGetListResponse(GET_DEPOSIT_ACCOUNTS, AccountDto.class);
   }
 
   /**
    * Test for {@link InvestmentController#addDepositAccount(AccountDto)}
    *
-   * @param depositAccount the expected deposit account
+   * @param depositAccount the input / expected deposit account
    */
-  @ParameterizedTest(name = "Happy Path: Add Deposit Account")
-  @InvestmentTestArguments(type = AccountDto.class)
+  @Test
+  @DisplayName("Happy Path: Add Deposit Account")
   void addDepositAccount(final AccountDto depositAccount) {
-    post(DEPOSIT_ACCOUNTS_URL, dtoToDtoSkipId.transform(depositAccount, AccountDto.class))
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBody(AccountDto.class)
-                    .consumeWith(
-                        r -> {
-                          var account = r.getResponseBody();
-                          assertNotNull(account);
-                          assertAll(
-                              () -> assertNotNull(account.id()),
-                              () -> assertNotNull(account.bankName()),
-                              () -> assertNotNull(account.branch()),
-                              () -> assertNotNull(account.accountNumber()),
-                              () -> assertNotNull(account.balance()));
-                        }));
+    verifyPostResponse(
+        ADD_DEPOSIT_ACCOUNT,
+        dtoToDtoSkipId.transform(depositAccount, AccountDto.class),
+        AccountDto.class);
   }
 
   /** Test for {@link InvestmentController#getLoanAccounts()} */
   @Test
   @DisplayName("Happy Path: Get Loan Accounts")
   void getLoanAccounts() {
-    get(LOAN_ACCOUNTS_URL)
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBodyList(AccountDto.class)
-                    .consumeWith(
-                        r ->
-                            assertTrue(
-                                Objects.requireNonNull(r.getResponseBody()).size()
-                                    >= MIN_RECORDS_RESULT)));
+    verifyGetListResponse(GET_LOAN_ACCOUNTS, AccountDto.class);
   }
 
   /**
    * Test for {@link InvestmentController#addLoanAccount(AccountDto)}
    *
-   * @param loanAccount the expected loan account
+   * @param loanAccount the input / expected loan account
    */
-  @ParameterizedTest(name = "Happy Path: Add Loan Account")
-  @InvestmentTestArguments(type = AccountDto.class)
-  void addLoanAccount(final AccountDto loanAccount) {
-    post(LOAN_ACCOUNTS_URL, dtoToDtoSkipId.transform(loanAccount, AccountDto.class))
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBody(AccountDto.class)
-                    .consumeWith(
-                        r -> {
-                          var account = r.getResponseBody();
-                          assertNotNull(account);
-                          assertAll(
-                              () -> assertNotNull(account.id()),
-                              () -> assertNotNull(account.bankName()),
-                              () -> assertNotNull(account.branch()),
-                              () -> assertNotNull(account.accountNumber()),
-                              () -> assertNotNull(account.balance()));
-                        }));
+  @Test
+  @DisplayName("Happy Path: Add Loan Account")
+  void addLoanAccount(@NegativeBalance final AccountDto loanAccount) {
+    verifyPostResponse(
+        ADD_LOAN_ACCOUNT,
+        dtoToDtoSkipId.transform(loanAccount, AccountDto.class),
+        AccountDto.class);
   }
 
   /** Test for {@link InvestmentController#getMiscellaneousAccounts()} */
   @Test
   @DisplayName("Happy Path: Get Miscellaneous Accounts")
   void getMiscellaneousAccounts() {
-    get(MISCELLANEOUS_ACCOUNTS_URL)
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBodyList(MiscellaneousDto.class)
-                    .consumeWith(
-                        r ->
-                            assertTrue(
-                                Objects.requireNonNull(r.getResponseBody()).size()
-                                    >= MIN_RECORDS_RESULT)));
+    verifyGetListResponse(GET_MISC_ACCOUNTS, MiscellaneousDto.class);
   }
 
   /**
    * Test for {@link InvestmentController#addMiscellaneousAccount(MiscellaneousDto)}
    *
-   * @param miscellaneousDto the expected miscellaneous account
+   * @param miscellaneousDto the input / expected miscellaneous account
    */
-  @ParameterizedTest(name = "Happy Path: Add Miscellaneous Account")
-  @InvestmentTestArguments(type = MiscellaneousDto.class)
+  @Test
+  @DisplayName("Happy Path: Add Miscellaneous Account")
   void addMiscellaneousAccount(final MiscellaneousDto miscellaneousDto) {
-    post(
-            MISCELLANEOUS_ACCOUNTS_URL,
-            dtoToDtoSkipId.transform(miscellaneousDto, MiscellaneousDto.class))
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBody(MiscellaneousDto.class)
-                    .consumeWith(
-                        r -> {
-                          var miscellaneous = r.getResponseBody();
-                          assertNotNull(miscellaneous);
-                          assertAll(
-                              () -> assertNotNull(miscellaneous.id()),
-                              () -> assertNotNull(miscellaneous.investmentName()),
-                              () -> assertNotNull(miscellaneous.balance()));
-                        }));
+    verifyPostResponse(
+        ADD_MISC_ACCOUNT,
+        dtoToDtoSkipId.transform(miscellaneousDto, MiscellaneousDto.class),
+        MiscellaneousDto.class);
   }
 
   /** Test for {@link InvestmentController#getMutualFunds()} */
   @Test
   @DisplayName("Happy Path: Get Mutual Funds")
   void getMutualFunds() {
-    get(MUTUAL_FUNDS_URL)
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBodyList(MutualFundDto.class)
-                    .consumeWith(
-                        r ->
-                            assertTrue(
-                                Objects.requireNonNull(r.getResponseBody()).size()
-                                    >= MIN_RECORDS_RESULT)));
+    verifyGetListResponse(GET_MUTUAL_FUNDS, MutualFundDto.class);
   }
 
   /**
    * Test for {@link InvestmentController#addMutualFund(MutualFundDto)}
    *
-   * @param mutualFundDto the expected mutual fund dto
+   * @param mutualFundDto the input / expected mutual fund dto
    */
-  @ParameterizedTest(name = "Happy Path: Add Mutual Fund")
-  @InvestmentTestArguments(type = MutualFundDto.class)
+  @Test
+  @DisplayName("Happy Path: Add Mutual Fund")
   void addMutualFund(final MutualFundDto mutualFundDto) {
-    post(MUTUAL_FUNDS_URL, dtoToDtoSkipId.transform(mutualFundDto, MutualFundDto.class))
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBody(MutualFundDto.class)
-                    .consumeWith(
-                        r -> {
-                          var mutualFund = r.getResponseBody();
-                          assertNotNull(mutualFund);
-                          assertAll(
-                              () -> assertNotNull(mutualFund.id()),
-                              () -> assertNotNull(mutualFund.mfCode()),
-                              () -> assertNotNull(mutualFund.mfName()),
-                              () -> assertNotNull(mutualFund.amc()),
-                              () -> assertNotNull(mutualFund.type()));
-                        }));
+    verifyPostResponse(
+        ADD_MUTUAL_FUND,
+        dtoToDtoSkipId.transform(mutualFundDto, MutualFundDto.class),
+        MutualFundDto.class);
   }
 
+  /** Test for {@link InvestmentController#getMutualFundBuyTransactions()} */
+  @Test
+  @DisplayName("Happy Path: Get Mutual Fund Buy Transactions")
+  void getMutualFundBuyTransactions() {
+    verifyGetListResponse(GET_MF_BUY_TRANSACTIONS, MutualFundBuyTransactionDto.class);
+  }
+
+  /**
+   * Test for {@link InvestmentController#addMutualFundBuyTransaction(MutualFundBuyTransactionDto)}
+   *
+   * @param mfBuyTransactionDto the input / expected mutual fund buy transaction dto
+   */
+  @Test
+  @DisplayName("Happy Path: Add Mutual Fund Buy Transaction")
+  void addMutualFundBuyTransaction(final MutualFundBuyTransactionDto mfBuyTransactionDto) {
+    verifyPostResponse(
+        ADD_MF_BUY_TRANSACTIONS,
+        dtoToDtoSkipId.transform(mfBuyTransactionDto, MutualFundBuyTransactionDto.class),
+        MutualFundBuyTransactionDto.class);
+  }
+
+  /** Test for {@link InvestmentController#getMutualFundSellTransactions()} */
+  @Test
+  @DisplayName("Happy Path: Get Mutual Fund Sell Transactions")
+  void getMutualFundSellTransactions() {
+    verifyGetListResponse(GET_MF_SELL_TRANSACTIONS, MutualFundSellTransactionDto.class);
+  }
+
+  /**
+   * Test for {@link
+   * InvestmentController#addMutualFundSellTransaction(MutualFundSellTransactionDto)}
+   *
+   * @param mfSellTransactionDto the input / expected mutual fund buy transaction dto
+   */
+  @Test
+  @DisplayName("Happy Path: Add Mutual Fund Sell Transaction")
+  void addMutualFundSellTransaction(final MutualFundSellTransactionDto mfSellTransactionDto) {
+    verifyPostResponse(
+        ADD_MF_SELL_TRANSACTIONS,
+        dtoToDtoSkipId.transform(mfSellTransactionDto, MutualFundSellTransactionDto.class),
+        MutualFundSellTransactionDto.class);
+  }
   /** Test for {@link InvestmentController#getSavingAccounts()} */
   @Test
   @DisplayName("Happy Path: Get Saving Accounts")
   void getSavingAccounts() {
-    get(SAVING_ACCOUNTS_URL)
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBodyList(AccountDto.class)
-                    .consumeWith(
-                        r ->
-                            assertTrue(
-                                Objects.requireNonNull(r.getResponseBody()).size()
-                                    >= MIN_RECORDS_RESULT)));
+    verifyGetListResponse(GET_SAVING_ACCOUNTS, AccountDto.class);
   }
 
   /**
    * Test for {@link InvestmentController#addSavingAccount(AccountDto)}
    *
-   * @param savingAccountDto the expected saving account dto
+   * @param savingAccountDto the input / expected saving account dto
    */
-  @ParameterizedTest(name = "Happy Path: Add Saving Account")
-  @InvestmentTestArguments(type = AccountDto.class)
+  @Test
+  @DisplayName("Happy Path: Add Saving Account")
   void addSavingAccount(final AccountDto savingAccountDto) {
-    post(SAVING_ACCOUNTS_URL, dtoToDtoSkipId.transform(savingAccountDto, AccountDto.class))
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBody(AccountDto.class)
-                    .consumeWith(
-                        r -> {
-                          var account = r.getResponseBody();
-                          assertNotNull(account);
-                          assertAll(
-                              () -> assertNotNull(account.id()),
-                              () -> assertNotNull(account.bankName()),
-                              () -> assertNotNull(account.branch()),
-                              () -> assertNotNull(account.accountNumber()),
-                              () -> assertNotNull(account.balance()));
-                        }));
+    verifyPostResponse(
+        ADD_SAVING_ACCOUNT,
+        dtoToDtoSkipId.transform(savingAccountDto, AccountDto.class),
+        AccountDto.class);
   }
 
   /** Test for {@link InvestmentController#getStocks()} */
   @Test
   @DisplayName("Happy Path: Get Saving Accounts")
   void getStocks() {
-    get(STOCKS_URL)
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBodyList(StockDto.class)
-                    .consumeWith(
-                        r ->
-                            assertTrue(
-                                Objects.requireNonNull(r.getResponseBody()).size()
-                                    >= MIN_RECORDS_RESULT)));
+    verifyGetListResponse(GET_STOCKS, StockDto.class);
   }
 
   /**
    * Test for {@link InvestmentController#addStock(StockDto)}
    *
-   * @param stockDto the expected stock dto
+   * @param stockDto the input / expected stock dto
    */
-  @ParameterizedTest(name = "Happy Path: Add Stock")
-  @InvestmentTestArguments(type = StockDto.class)
+  @Test
+  @DisplayName("Happy Path: Add Stock")
   void addStock(final StockDto stockDto) {
-    post(STOCKS_URL, dtoToDtoSkipId.transform(stockDto, StockDto.class))
-        .expectAll(
-            ControllerTest::isOk,
-            ControllerTest::isContentTypeJson,
-            rSpec ->
-                rSpec
-                    .expectBody(StockDto.class)
-                    .consumeWith(
-                        r -> {
-                          var stock = r.getResponseBody();
-                          assertNotNull(stock);
-                          assertAll(
-                              () -> assertNotNull(stock.id()),
-                              () -> assertNotNull(stock.stockCode()),
-                              () -> assertNotNull(stock.stockName()),
-                              () -> assertNotNull(stock.stockExchange()),
-                              () -> assertNotNull(stock.broker()));
-                        }));
+    verifyPostResponse(
+        ADD_STOCK, dtoToDtoSkipId.transform(stockDto, StockDto.class), StockDto.class);
   }
 }

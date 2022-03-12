@@ -5,7 +5,7 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(GET())
-        urlPath('/investment/miscellaneousaccounts')
+        urlPath('/investments/miscellaneousaccounts')
         headers {
             contentType(applicationJson())
         }

@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** This Record holds the property values for Postgresql connection */
 @ConstructorBinding
-@ConfigurationProperties(prefix = "db")
+@ConfigurationProperties(prefix = "db.postgresql")
 public record DatabaseProperties(
     String driver,
     String host,

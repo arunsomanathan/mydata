@@ -1,21 +1,22 @@
 package com.mydata.userdata.service;
 
+import static org.junit.jupiter.api.Named.named;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
-import com.mydata.userdata.dto.AccountDto;
-import com.mydata.userdata.dto.MiscellaneousDto;
-import com.mydata.userdata.dto.MutualFundDto;
-import com.mydata.userdata.dto.StockDto;
+import com.expediagroup.beans.BeanUtils;
+import com.expediagroup.transformer.model.FieldTransformer;
+import com.mydata.userdata.dto.*;
 import com.mydata.userdata.entity.*;
 import com.mydata.userdata.repository.*;
-import com.mydata.userdata.utils.InvestmentTestArguments;
-import com.mydata.userdata.utils.InvestmentTestArguments.Mode;
+import com.mydata.userdata.utils.GenerateFrom;
+import com.mydata.userdata.utils.InvestmentParameterResolver;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,10 @@ import reactor.test.StepVerifier;
 @MockitoSettings
 @SpringJUnitConfig(classes = {InvestmentService.class})
 @RequiredArgsConstructor
+@ExtendWith(InvestmentParameterResolver.class)
 class InvestmentServiceTest {
+
+  public static final String STUB_RESPONSE = "stubResponse";
 
   @Autowired private InvestmentService investService;
 
@@ -36,6 +40,8 @@ class InvestmentServiceTest {
   @MockBean private LoanRepository loanRepo;
   @MockBean private MiscellaneousRepository miscRepo;
   @MockBean private MutualFundRepository mfRepo;
+  @MockBean private MutualFundBuyTransactionRepository mfBuyTranRepo;
+  @MockBean private MutualFundSellTransactionRepository mfSellTranRepo;
   @MockBean private SavingAccountRepository saRepo;
   @MockBean private StockRepository stockRepo;
 
@@ -43,6 +49,22 @@ class InvestmentServiceTest {
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(daRepo, loanRepo, miscRepo, mfRepo, saRepo, stockRepo);
+  }
+
+  /**
+   * Test for {@link InvestmentService#getDepositAccounts()}
+   *
+   * @param stubResponse list of deposit accounts to set in mock response
+   * @param expectedResult list of expected objects
+   */
+  @Test
+  @DisplayName("Happy Path: Get Active Deposit Accounts")
+  void getDepositAccounts(
+      final List<DepositAccount> stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final List<AccountDto> expectedResult) {
+    when(daRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stubResponse));
+    stepVerify(investService.getDepositAccounts(), expectedResult);
+    verify(daRepo, times(1)).findByActive(Boolean.TRUE);
   }
 
   /**
@@ -56,6 +78,22 @@ class InvestmentServiceTest {
   }
 
   /**
+   * Test for {@link InvestmentService#addDepositAccount(AccountDto)}
+   *
+   * @param stubResponse the deposit account
+   * @param expectedResult the expected result object
+   */
+  @Test
+  @DisplayName("Happy Path: Add Deposit Accounts")
+  void addDepositAccount(
+      final DepositAccount stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final AccountDto expectedResult) {
+    when(daRepo.save(any(DepositAccount.class))).thenReturn(Mono.just(stubResponse));
+    stepVerify(investService.addDepositAccount(expectedResult), expectedResult);
+    verify(daRepo, times(1)).save(any(DepositAccount.class));
+  }
+
+  /**
    * Step Verifier
    *
    * @param publisher the publisher to be tested
@@ -66,47 +104,17 @@ class InvestmentServiceTest {
   }
 
   /**
-   * Test for {@link InvestmentService#getDepositAccounts()}
-   *
-   * @param depositAccounts list of deposit accounts to set in mock response
-   * @param expectedResult list of expected objects
-   */
-  @ParameterizedTest(name = "Happy Path: Get Active Deposit Accounts")
-  @InvestmentTestArguments(
-      type = DepositAccount.class,
-      mode = Mode.LIST,
-      companion = AccountDto.class)
-  void getDepositAccounts(
-      final List<DepositAccount> depositAccounts, final List<AccountDto> expectedResult) {
-    when(daRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(depositAccounts));
-    stepVerify(investService.getDepositAccounts(), expectedResult);
-    verify(daRepo, times(1)).findByActive(Boolean.TRUE);
-  }
-
-  /**
-   * Test for {@link InvestmentService#addDepositAccount(AccountDto)}
-   *
-   * @param depositAccount the deposit account
-   * @param expectedResult the expected result object
-   */
-  @ParameterizedTest(name = "Happy Path: Add Deposit Accounts")
-  @InvestmentTestArguments(type = DepositAccount.class, companion = AccountDto.class)
-  void addDepositAccount(final DepositAccount depositAccount, final AccountDto expectedResult) {
-    when(daRepo.save(any(DepositAccount.class))).thenReturn(Mono.just(depositAccount));
-    stepVerify(investService.addDepositAccount(expectedResult), expectedResult);
-    verify(daRepo, times(1)).save(any(DepositAccount.class));
-  }
-
-  /**
    * Test for {@link InvestmentService#getLoanAccounts()}
    *
-   * @param loanAccounts list of loan accounts in mock response
+   * @param stubResponse list of loan accounts in mock response
    * @param expectedResult list of expected objects
    */
-  @ParameterizedTest(name = "Happy Path: Get Active Loan Accounts")
-  @InvestmentTestArguments(type = Loan.class, mode = Mode.LIST, companion = AccountDto.class)
-  void getLoanAccounts(final List<Loan> loanAccounts, final List<AccountDto> expectedResult) {
-    when(loanRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(loanAccounts));
+  @Test
+  @DisplayName("Happy Path: Get Active Loan Accounts")
+  void getLoanAccounts(
+      final List<Loan> stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final List<AccountDto> expectedResult) {
+    when(loanRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stubResponse));
     stepVerify(investService.getLoanAccounts(), expectedResult);
     verify(loanRepo, times(1)).findByActive(Boolean.TRUE);
   }
@@ -114,13 +122,14 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#addLoanAccount(AccountDto)}
    *
-   * @param loanAccount the deposit account
+   * @param stubResponse the deposit account
    * @param expectedResult the expected result object
    */
-  @ParameterizedTest(name = "Happy Path: Add Loan Accounts")
-  @InvestmentTestArguments(type = Loan.class, companion = AccountDto.class)
-  void addLoanAccount(final Loan loanAccount, final AccountDto expectedResult) {
-    when(loanRepo.save(any(Loan.class))).thenReturn(Mono.just(loanAccount));
+  @Test
+  @DisplayName("Happy Path: Add Loan Accounts")
+  void addLoanAccount(
+      final Loan stubResponse, @GenerateFrom(STUB_RESPONSE) final AccountDto expectedResult) {
+    when(loanRepo.save(any(Loan.class))).thenReturn(Mono.just(stubResponse));
     stepVerify(investService.addLoanAccount(expectedResult), expectedResult);
     verify(loanRepo, times(1)).save(any(Loan.class));
   }
@@ -128,17 +137,15 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#getMiscellaneousAccounts()}
    *
-   * @param miscAccounts list of miscellaneous accounts in mock response
+   * @param stubResponse list of miscellaneous accounts in mock response
    * @param expectedResult list of expected objects
    */
-  @ParameterizedTest(name = "Happy Path: Get Active Miscellaneous Accounts")
-  @InvestmentTestArguments(
-      type = Miscellaneous.class,
-      mode = Mode.LIST,
-      companion = MiscellaneousDto.class)
+  @Test
+  @DisplayName("Happy Path: Get Active Miscellaneous Accounts")
   void getMiscellaneousAccounts(
-      final List<Miscellaneous> miscAccounts, final List<MiscellaneousDto> expectedResult) {
-    when(miscRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(miscAccounts));
+      final List<Miscellaneous> stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final List<MiscellaneousDto> expectedResult) {
+    when(miscRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stubResponse));
     stepVerify(investService.getMiscellaneousAccounts(), expectedResult);
     verify(miscRepo, times(1)).findByActive(Boolean.TRUE);
   }
@@ -146,14 +153,15 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#addMiscellaneousAccount(MiscellaneousDto)}
    *
-   * @param miscAccounts the miscellaneous account
+   * @param stubResponse the miscellaneous account
    * @param expectedResult the expected result object
    */
-  @ParameterizedTest(name = "Happy Path: Add Miscellaneous Accounts")
-  @InvestmentTestArguments(type = Miscellaneous.class, companion = MiscellaneousDto.class)
+  @Test
+  @DisplayName("Happy Path: Add Miscellaneous Accounts")
   void addMiscellaneousAccount(
-      final Miscellaneous miscAccounts, final MiscellaneousDto expectedResult) {
-    when(miscRepo.save(any(Miscellaneous.class))).thenReturn(Mono.just(miscAccounts));
+      final Miscellaneous stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final MiscellaneousDto expectedResult) {
+    when(miscRepo.save(any(Miscellaneous.class))).thenReturn(Mono.just(stubResponse));
     stepVerify(investService.addMiscellaneousAccount(expectedResult), expectedResult);
     verify(miscRepo, times(1)).save(any(Miscellaneous.class));
   }
@@ -161,17 +169,15 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#getMutualFunds()}
    *
-   * @param mutualFunds list of mutual funds in mock response
+   * @param stubResponse list of mutual funds in mock response
    * @param expectedResult list of expected objects
    */
-  @ParameterizedTest(name = "Happy Path: Get Active Mutual Funds")
-  @InvestmentTestArguments(
-      type = MutualFund.class,
-      mode = Mode.LIST,
-      companion = MutualFundDto.class)
+  @Test
+  @DisplayName("Happy Path: Get Active Mutual Funds")
   void getMutualFunds(
-      final List<MutualFund> mutualFunds, final List<MutualFundDto> expectedResult) {
-    when(mfRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(mutualFunds));
+      final List<MutualFund> stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final List<MutualFundDto> expectedResult) {
+    when(mfRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stubResponse));
     stepVerify(investService.getMutualFunds(), expectedResult);
     verify(mfRepo, times(1)).findByActive(Boolean.TRUE);
   }
@@ -179,31 +185,116 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#addMutualFund(MutualFundDto)}
    *
-   * @param mutualFund the mutual fund
+   * @param stubResponse the mutual fund
    * @param expectedResult the expected result object
    */
-  @ParameterizedTest(name = "Happy Path: Add Mutual Fund")
-  @InvestmentTestArguments(type = MutualFund.class, companion = MutualFundDto.class)
-  void addMutualFund(final MutualFund mutualFund, final MutualFundDto expectedResult) {
-    when(mfRepo.save(any(MutualFund.class))).thenReturn(Mono.just(mutualFund));
+  @Test
+  @DisplayName("Happy Path: Add Mutual Fund")
+  void addMutualFund(
+      final MutualFund stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final MutualFundDto expectedResult) {
+    when(mfRepo.save(any(MutualFund.class))).thenReturn(Mono.just(stubResponse));
     stepVerify(investService.addMutualFund(expectedResult), expectedResult);
     verify(mfRepo, times(1)).save(any(MutualFund.class));
   }
 
   /**
+   * Test for {@link InvestmentService#getMutualFundBuyTransactions(Boolean)}
+   *
+   * @param stubRespTemp list of {@link MutualFundBuyTransaction} in mock response
+   * @param expResTemp list of expected {@link MutualFundBuyTransactionDto} objects
+   * @return {@link DynamicTest}
+   */
+  @TestFactory
+  Stream<DynamicTest> getMutualFundBuyTransactions(
+      final List<MutualFundBuyTransaction> stubRespTemp,
+      @GenerateFrom("stubRespTemp") final List<MutualFundBuyTransactionDto> expResTemp) {
+
+    final var disName = "Happy Path: Get Mutual Fund Buy Transaction by Is Sold Out value : ";
+
+    var inputStream =
+        Stream.of(
+            named(disName + Boolean.TRUE, Boolean.TRUE),
+            named(disName + Boolean.FALSE, Boolean.FALSE));
+
+    ThrowingConsumer<Boolean> testExecutor =
+        (isSoldOut) -> {
+          @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+          final FieldTransformer<Boolean, Boolean> ft =
+              new FieldTransformer<>("isSoldOut", () -> isSoldOut);
+          var stubResponse =
+              stubRespTemp.stream()
+                  .map(
+                      e ->
+                          new BeanUtils()
+                              .getTransformer()
+                              .withFieldTransformer(ft)
+                              .transform(e, MutualFundBuyTransaction.class))
+                  .toList();
+          var expectedResult =
+              expResTemp.stream()
+                  .map(
+                      e ->
+                          new BeanUtils()
+                              .getTransformer()
+                              .withFieldTransformer(ft)
+                              .transform(e, MutualFundBuyTransactionDto.class))
+                  .toList();
+          when(mfBuyTranRepo.findByIsSoldOut(isSoldOut))
+              .thenReturn(Flux.fromIterable(stubResponse));
+          stepVerify(investService.getMutualFundBuyTransactions(isSoldOut), expectedResult);
+          verify(mfBuyTranRepo, times(1)).findByIsSoldOut(isSoldOut);
+        };
+    return DynamicTest.stream(inputStream, testExecutor);
+  }
+
+  /**
+   * Test for {@link InvestmentService#addMutualFundBuyTransaction(MutualFundBuyTransactionDto)}
+   * (MutualFundBuyTransactionDto)}
+   *
+   * @param stubResponse list of {@link MutualFundBuyTransaction} in mock response
+   * @param expectedResult list of expected {@link MutualFundBuyTransactionDto} objects
+   */
+  @Test
+  @DisplayName("Happy Path: Add Mutual Fund Buy Transaction")
+  void addMutualFundBuyTransactions(
+      final MutualFundBuyTransaction stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final MutualFundBuyTransactionDto expectedResult) {
+    when(mfBuyTranRepo.save(any(MutualFundBuyTransaction.class)))
+        .thenReturn(Mono.just(stubResponse));
+    stepVerify(investService.addMutualFundBuyTransaction(expectedResult), expectedResult);
+    verify(mfBuyTranRepo, times(1)).save(any(MutualFundBuyTransaction.class));
+  }
+
+  /**
+   * Test for {@link InvestmentService#addMutualFundSellTransaction(MutualFundSellTransactionDto)}
+   *
+   * @param stubResponse list of {@link MutualFundSellTransaction} in mock response
+   * @param expectedResult list of expected {@link MutualFundSellTransactionDto} objects
+   */
+  @Test
+  @DisplayName("Happy Path: Add Mutual Fund Sell Transaction")
+  void addMutualFundSellTransactions(
+      final MutualFundSellTransaction stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final MutualFundSellTransactionDto expectedResult) {
+    when(mfSellTranRepo.save(any(MutualFundSellTransaction.class)))
+        .thenReturn(Mono.just(stubResponse));
+    stepVerify(investService.addMutualFundSellTransaction(expectedResult), expectedResult);
+    verify(mfSellTranRepo, times(1)).save(any(MutualFundSellTransaction.class));
+  }
+
+  /**
    * Test for {@link InvestmentService#getSavingAccounts()}
    *
-   * @param savingAccounts list of saving accounts in mock response
+   * @param stubResponse list of saving accounts in mock response
    * @param expectedResult list of expected objects
    */
-  @ParameterizedTest(name = "Happy Path: Get Active Saving Accounts")
-  @InvestmentTestArguments(
-      type = SavingAccount.class,
-      mode = Mode.LIST,
-      companion = AccountDto.class)
+  @Test
+  @DisplayName("Happy Path: Get Active Saving Accounts")
   void getSavingAccounts(
-      final List<SavingAccount> savingAccounts, final List<AccountDto> expectedResult) {
-    when(saRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(savingAccounts));
+      final List<SavingAccount> stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final List<AccountDto> expectedResult) {
+    when(saRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stubResponse));
     stepVerify(investService.getSavingAccounts(), expectedResult);
     verify(saRepo, times(1)).findByActive(Boolean.TRUE);
   }
@@ -211,13 +302,15 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#addSavingAccount(AccountDto)}
    *
-   * @param savingAccount the saving account
+   * @param stubResponse the saving account
    * @param expectedResult the expected result object
    */
-  @ParameterizedTest(name = "Happy Path: Add Saving Account")
-  @InvestmentTestArguments(type = SavingAccount.class, companion = AccountDto.class)
-  void addSavingAccount(final SavingAccount savingAccount, final AccountDto expectedResult) {
-    when(saRepo.save(any(SavingAccount.class))).thenReturn(Mono.just(savingAccount));
+  @Test
+  @DisplayName("Happy Path: Add Saving Account")
+  void addSavingAccount(
+      final SavingAccount stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final AccountDto expectedResult) {
+    when(saRepo.save(any(SavingAccount.class))).thenReturn(Mono.just(stubResponse));
     stepVerify(investService.addSavingAccount(expectedResult), expectedResult);
     verify(saRepo, times(1)).save(any(SavingAccount.class));
   }
@@ -225,13 +318,15 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#getStocks()}
    *
-   * @param stocks list of stocks in mock response
+   * @param stubResponse list of stocks in mock response
    * @param expectedResult list of expected objects
    */
-  @ParameterizedTest(name = "Happy Path: Get Active Stocks")
-  @InvestmentTestArguments(type = Stock.class, mode = Mode.LIST, companion = StockDto.class)
-  void getStocks(final List<Stock> stocks, final List<StockDto> expectedResult) {
-    when(stockRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stocks));
+  @Test
+  @DisplayName("Happy Path: Get Active Stocks")
+  void getStocks(
+      final List<Stock> stubResponse,
+      @GenerateFrom(STUB_RESPONSE) final List<StockDto> expectedResult) {
+    when(stockRepo.findByActive(Boolean.TRUE)).thenReturn(Flux.fromIterable(stubResponse));
     stepVerify(investService.getStocks(), expectedResult);
     verify(stockRepo, times(1)).findByActive(Boolean.TRUE);
   }
@@ -239,13 +334,14 @@ class InvestmentServiceTest {
   /**
    * Test for {@link InvestmentService#addStock(StockDto)}
    *
-   * @param stock the stock
+   * @param stubResponse the stock
    * @param expectedResult the expected result object
    */
-  @ParameterizedTest(name = "Happy Path: Add Stock")
-  @InvestmentTestArguments(type = Stock.class, companion = StockDto.class)
-  void addStock(final Stock stock, final StockDto expectedResult) {
-    when(stockRepo.save(any(Stock.class))).thenReturn(Mono.just(stock));
+  @Test
+  @DisplayName("Happy Path: Add Stock")
+  void addStock(
+      final Stock stubResponse, @GenerateFrom(STUB_RESPONSE) final StockDto expectedResult) {
+    when(stockRepo.save(any(Stock.class))).thenReturn(Mono.just(stubResponse));
     stepVerify(investService.addStock(expectedResult), expectedResult);
     verify(stockRepo, times(1)).save(any(Stock.class));
   }

@@ -5,7 +5,7 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(GET())
-        urlPath('/investment/stocks')
+        urlPath('/investments/stocks')
         headers {
             contentType(applicationJson())
         }
@@ -13,7 +13,7 @@ Contract.make {
     response {
         status(OK())
         body([
-                "id"            : $(anyPositiveInt()),
+                "id"           : $(anyPositiveInt()),
                 "stockCode"    : $(anyNonBlankString()),
                 "stockName"    : $(anyNonBlankString()),
                 "stockExchange": $(anyNonBlankString()),

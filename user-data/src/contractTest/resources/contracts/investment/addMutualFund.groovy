@@ -5,7 +5,7 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(POST())
-        urlPath('/investment/mutualfunds')
+        urlPath('/investments/mutualfunds')
         body([
                 "id"    : null,
                 "mfCode": "Mutual Fund Code",
@@ -20,7 +20,7 @@ Contract.make {
     response {
         status(OK())
         body([
-                "id"            : $(anyPositiveInt()),
+                "id"    : $(anyPositiveInt()),
                 "mfCode": "Mutual Fund Code",
                 "mfName": "Mutual Fund Name",
                 "amc"   : "Mutual Fund AMC",

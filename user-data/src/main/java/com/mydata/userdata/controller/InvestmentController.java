@@ -1,11 +1,11 @@
 package com.mydata.userdata.controller;
 
+import static com.mydata.userdata.common.ApiNames.*;
+import static com.mydata.userdata.common.ApiUrls.*;
+import static com.mydata.userdata.common.CommonStrings.LOG_MSG_EXEC_API;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import com.mydata.userdata.dto.AccountDto;
-import com.mydata.userdata.dto.MiscellaneousDto;
-import com.mydata.userdata.dto.MutualFundDto;
-import com.mydata.userdata.dto.StockDto;
+import com.mydata.userdata.dto.*;
 import com.mydata.userdata.service.InvestmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
  */
 @RestController
 @Slf4j
-@RequestMapping(path = "/investment")
+@RequestMapping(path = INVESTMENT_BASE_URL)
 @RequiredArgsConstructor
 public class InvestmentController {
 
@@ -30,11 +30,11 @@ public class InvestmentController {
    * @return {@link Flux<AccountDto>}
    */
   @GetMapping(
-      name = "GetDepositAccounts",
-      path = "/depositaccounts",
+      name = GET_DEPOSIT_ACCOUNTS,
+      path = DEPOSIT_ACCOUNTS_URL,
       produces = APPLICATION_JSON_VALUE)
   public Flux<AccountDto> getDepositAccounts() {
-    log.info("Get all Deposit Accounts");
+    log.info(LOG_MSG_EXEC_API, GET_DEPOSIT_ACCOUNTS);
     return investmentService.getDepositAccounts();
   }
 
@@ -44,12 +44,12 @@ public class InvestmentController {
    * @return {@link Mono<AccountDto>}
    */
   @PostMapping(
-      name = "AddDepositAccount",
-      path = "/depositaccounts",
+      name = ADD_DEPOSIT_ACCOUNT,
+      path = DEPOSIT_ACCOUNTS_URL,
       consumes = APPLICATION_JSON_VALUE,
       produces = APPLICATION_JSON_VALUE)
   public Mono<AccountDto> addDepositAccount(@RequestBody final AccountDto depositAccount) {
-    log.info("Add a Deposit Account");
+    log.info(LOG_MSG_EXEC_API, ADD_DEPOSIT_ACCOUNT);
     return investmentService.addDepositAccount(depositAccount);
   }
 
@@ -58,9 +58,9 @@ public class InvestmentController {
    *
    * @return {@link Flux<AccountDto>}
    */
-  @GetMapping(name = "GetLoanAccounts", path = "/loanaccounts", produces = APPLICATION_JSON_VALUE)
+  @GetMapping(name = GET_LOAN_ACCOUNTS, path = LOAN_ACCOUNTS_URL, produces = APPLICATION_JSON_VALUE)
   public Flux<AccountDto> getLoanAccounts() {
-    log.info("Get all Loan Accounts");
+    log.info(LOG_MSG_EXEC_API, GET_LOAN_ACCOUNTS);
     return investmentService.getLoanAccounts();
   }
 
@@ -70,12 +70,12 @@ public class InvestmentController {
    * @return {@link Mono<AccountDto>}
    */
   @PostMapping(
-      name = "AddLoanAccount",
-      path = "/loanaccounts",
+      name = ADD_LOAN_ACCOUNT,
+      path = LOAN_ACCOUNTS_URL,
       consumes = APPLICATION_JSON_VALUE,
       produces = APPLICATION_JSON_VALUE)
   public Mono<AccountDto> addLoanAccount(@RequestBody final AccountDto loanAccount) {
-    log.info("Add a Loan Account");
+    log.info(LOG_MSG_EXEC_API, ADD_LOAN_ACCOUNT);
     return investmentService.addLoanAccount(loanAccount);
   }
 
@@ -84,12 +84,9 @@ public class InvestmentController {
    *
    * @return {@link Flux<MiscellaneousDto>}
    */
-  @GetMapping(
-      name = "GetMiscellaneousAccounts",
-      path = "/miscellaneousaccounts",
-      produces = APPLICATION_JSON_VALUE)
+  @GetMapping(name = GET_MISC_ACCOUNTS, path = MISC_ACCOUNTS_URL, produces = APPLICATION_JSON_VALUE)
   public Flux<MiscellaneousDto> getMiscellaneousAccounts() {
-    log.info("Get all Miscellaneous Accounts");
+    log.info(LOG_MSG_EXEC_API, GET_MISC_ACCOUNTS);
     return investmentService.getMiscellaneousAccounts();
   }
 
@@ -99,13 +96,13 @@ public class InvestmentController {
    * @return {@link Mono<MiscellaneousDto>}
    */
   @PostMapping(
-      name = "AddMiscellaneousAccount",
-      path = "/miscellaneousaccounts",
+      name = ADD_MISC_ACCOUNT,
+      path = MISC_ACCOUNTS_URL,
       consumes = APPLICATION_JSON_VALUE,
       produces = APPLICATION_JSON_VALUE)
   public Mono<MiscellaneousDto> addMiscellaneousAccount(
       @RequestBody final MiscellaneousDto miscellaneous) {
-    log.info("Add a Miscellaneous Account");
+    log.info(LOG_MSG_EXEC_API, ADD_MISC_ACCOUNT);
     return investmentService.addMiscellaneousAccount(miscellaneous);
   }
 
@@ -114,9 +111,9 @@ public class InvestmentController {
    *
    * @return {@link Flux<MutualFundDto>}
    */
-  @GetMapping(name = "GetMutualFunds", path = "/mutualfunds", produces = APPLICATION_JSON_VALUE)
+  @GetMapping(name = GET_MUTUAL_FUNDS, path = MUTUAL_FUNDS_URL, produces = APPLICATION_JSON_VALUE)
   public Flux<MutualFundDto> getMutualFunds() {
-    log.info("Get all Miscellaneous Accounts");
+    log.info(LOG_MSG_EXEC_API, GET_MUTUAL_FUNDS);
     return investmentService.getMutualFunds();
   }
 
@@ -126,13 +123,74 @@ public class InvestmentController {
    * @return {@link Mono<MutualFundDto>}
    */
   @PostMapping(
-      name = "AddMutualFund",
-      path = "/mutualfunds",
+      name = ADD_MUTUAL_FUND,
+      path = MUTUAL_FUNDS_URL,
       consumes = APPLICATION_JSON_VALUE,
       produces = APPLICATION_JSON_VALUE)
   public Mono<MutualFundDto> addMutualFund(@RequestBody final MutualFundDto mutualFund) {
-    log.info("Add a Mutual Fund");
+    log.info(LOG_MSG_EXEC_API, ADD_MUTUAL_FUND);
     return investmentService.addMutualFund(mutualFund);
+  }
+
+  /**
+   * Method for Getting Mutual Funds Buy Transactions. Only fetched Buy transactions which are not
+   * sold out.
+   *
+   * @return {@link Flux<MutualFundBuyTransactionDto>}
+   */
+  @GetMapping(
+      name = GET_MF_BUY_TRANSACTIONS,
+      path = MF_BUY_TRANSACTION_URL,
+      produces = APPLICATION_JSON_VALUE)
+  public Flux<MutualFundBuyTransactionDto> getMutualFundBuyTransactions() {
+    log.info(LOG_MSG_EXEC_API, GET_MF_BUY_TRANSACTIONS);
+    return investmentService.getMutualFundBuyTransactions(Boolean.FALSE);
+  }
+
+  /**
+   * Method for Adding Mutual Funds Buy Transaction.
+   *
+   * @param mfBuyTransaction the mutual fund buy transaction
+   * @return {@link Mono<MutualFundBuyTransactionDto>}
+   */
+  @PostMapping(
+      name = ADD_MF_BUY_TRANSACTIONS,
+      path = MF_BUY_TRANSACTION_URL,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<MutualFundBuyTransactionDto> addMutualFundBuyTransaction(
+      @RequestBody final MutualFundBuyTransactionDto mfBuyTransaction) {
+    log.info(LOG_MSG_EXEC_API, ADD_MF_BUY_TRANSACTIONS);
+    return investmentService.addMutualFundBuyTransaction(mfBuyTransaction);
+  }
+
+  /**
+   * Method for Getting Mutual Funds Sell Transactions.
+   *
+   * @return {@link Flux<MutualFundSellTransactionDto>}
+   */
+  @GetMapping(
+      name = GET_MF_SELL_TRANSACTIONS,
+      path = MF_SELL_TRANSACTION_URL,
+      produces = APPLICATION_JSON_VALUE)
+  public Flux<MutualFundSellTransactionDto> getMutualFundSellTransactions() {
+    log.info(LOG_MSG_EXEC_API, GET_MF_SELL_TRANSACTIONS);
+    return investmentService.getMutualFundSellTransactions();
+  }
+
+  /**
+   * Method for Adding Mutual Funds Sell Transaction.
+   *
+   * @param mfSellTransaction the mutual fund sell transaction
+   * @return {@link Mono<MutualFundSellTransactionDto>}
+   */
+  @PostMapping(
+      name = ADD_MF_SELL_TRANSACTIONS,
+      path = MF_SELL_TRANSACTION_URL,
+      produces = APPLICATION_JSON_VALUE)
+  public Mono<MutualFundSellTransactionDto> addMutualFundSellTransaction(
+      @RequestBody final MutualFundSellTransactionDto mfSellTransaction) {
+    log.info(LOG_MSG_EXEC_API, ADD_MF_SELL_TRANSACTIONS);
+    return investmentService.addMutualFundSellTransaction(mfSellTransaction);
   }
 
   /**
@@ -141,11 +199,11 @@ public class InvestmentController {
    * @return {@link Flux<AccountDto>}
    */
   @GetMapping(
-      name = "GetSavingAccounts",
-      path = "/savingaccounts",
+      name = GET_SAVING_ACCOUNTS,
+      path = SAVING_ACCOUNTS_URL,
       produces = APPLICATION_JSON_VALUE)
   public Flux<AccountDto> getSavingAccounts() {
-    log.info("Get all Saving Accounts");
+    log.info(LOG_MSG_EXEC_API, GET_SAVING_ACCOUNTS);
     return investmentService.getSavingAccounts();
   }
 
@@ -155,12 +213,12 @@ public class InvestmentController {
    * @return {@link Mono<AccountDto>}
    */
   @PostMapping(
-      name = "AddSavingAccounts",
-      path = "/savingaccounts",
+      name = ADD_SAVING_ACCOUNT,
+      path = SAVING_ACCOUNTS_URL,
       consumes = APPLICATION_JSON_VALUE,
       produces = APPLICATION_JSON_VALUE)
   public Mono<AccountDto> addSavingAccount(@RequestBody final AccountDto savingAccount) {
-    log.info("Add a Saving Account");
+    log.info(LOG_MSG_EXEC_API, ADD_SAVING_ACCOUNT);
     return investmentService.addSavingAccount(savingAccount);
   }
 
@@ -169,9 +227,9 @@ public class InvestmentController {
    *
    * @return {@link Flux<StockDto>}
    */
-  @GetMapping(name = "GetStocks", path = "/stocks", produces = APPLICATION_JSON_VALUE)
+  @GetMapping(name = GET_STOCKS, path = STOCKS_URL, produces = APPLICATION_JSON_VALUE)
   public Flux<StockDto> getStocks() {
-    log.info("Get all Stocks");
+    log.info(LOG_MSG_EXEC_API, GET_STOCKS);
     return investmentService.getStocks();
   }
 
@@ -181,12 +239,12 @@ public class InvestmentController {
    * @return {@link Mono<StockDto>}
    */
   @PostMapping(
-      name = "AddStock",
-      path = "/stocks",
+      name = ADD_STOCK,
+      path = STOCKS_URL,
       consumes = APPLICATION_JSON_VALUE,
       produces = APPLICATION_JSON_VALUE)
   public Mono<StockDto> addStock(@RequestBody final StockDto stock) {
-    log.info("Add a Stock");
+    log.info(LOG_MSG_EXEC_API, ADD_STOCK);
     return investmentService.addStock(stock);
   }
 }

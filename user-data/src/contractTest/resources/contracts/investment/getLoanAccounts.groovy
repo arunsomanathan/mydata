@@ -5,7 +5,7 @@ import org.springframework.cloud.contract.spec.Contract
 Contract.make {
     request {
         method(GET())
-        urlPath('/investment/loanaccounts')
+        urlPath('/investments/loanaccounts')
         headers {
             contentType(applicationJson())
         }
@@ -13,12 +13,12 @@ Contract.make {
     response {
         status(OK())
         body([[
-                "id"           : $(anyPositiveInt()),
-                "bankName"     : $(anyNonBlankString()),
-                "branch"       : $(anyNonBlankString()),
-                "accountNumber": $(anyNonBlankString()),
-                "balance"      : $(anyDouble()),
-        ]])
+                      "id"           : $(anyPositiveInt()),
+                      "bankName"     : $(anyNonBlankString()),
+                      "branch"       : $(anyNonBlankString()),
+                      "accountNumber": $(anyNonBlankString()),
+                      "balance"      : $(anyDouble()),
+              ]])
         headers {
             contentType(applicationJson())
         }

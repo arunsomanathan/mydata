@@ -3,12 +3,8 @@ package com.mydata.userdata.service;
 import static com.mydata.userdata.common.ObjectProperties.*;
 
 import com.expediagroup.beans.BeanUtils;
-import com.expediagroup.beans.transformer.BeanTransformer;
 import com.expediagroup.transformer.model.FieldTransformer;
-import com.mydata.userdata.dto.AccountDto;
-import com.mydata.userdata.dto.MiscellaneousDto;
-import com.mydata.userdata.dto.MutualFundDto;
-import com.mydata.userdata.dto.StockDto;
+import com.mydata.userdata.dto.*;
 import com.mydata.userdata.entity.*;
 import com.mydata.userdata.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -23,28 +19,28 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentService {
 
+  private static final FieldTransformer<Boolean, Boolean> ACTIVE_TRUE_TRNSFMR =
+      new FieldTransformer<>(ACCOUNT_ACTIVE, () -> Boolean.TRUE);
+  private static final FieldTransformer<String, String> ID_NULL_TRNSFMR =
+      new FieldTransformer<>(ACCOUNT_ID, () -> null);
   private final DepositAccountRepository depositAccountRepository;
   private final LoanRepository loanRepository;
   private final MiscellaneousRepository miscellaneousRepository;
   private final MutualFundRepository mutualFundRepository;
+  private final MutualFundBuyTransactionRepository mutualFundBuyTransactionRepository;
+  private final MutualFundSellTransactionRepository mutualFundSellTransactionRepository;
   private final SavingAccountRepository savingAccountRepository;
   private final StockRepository stockRepository;
 
-  private final FieldTransformer<Boolean, Boolean> trueActiveTransformer =
-      new FieldTransformer<>(ACCOUNT_ACTIVE, () -> Boolean.TRUE);
-
-  private final FieldTransformer<String, String> nullIdTransformer =
-      new FieldTransformer<>(ACCOUNT_ID, () -> null);
-
-  private final BeanTransformer dtoToEntitySkipId =
-      new BeanUtils()
-          .getTransformer()
-          .withFieldTransformer(nullIdTransformer, trueActiveTransformer)
-          .skipTransformationForField(ACCOUNT_MODIFIED_AT, ACCOUNT_CREATED_AT)
-          .setDefaultValueForMissingField(false)
-          .setDefaultValueForMissingPrimitiveField(false);
-
-  private final BeanTransformer entityToDto = new BeanUtils().getTransformer();
+  private <T> T dtoToEntitySkipId(Object dto, Class<T> entityType) {
+    return new BeanUtils()
+        .getTransformer()
+        .withFieldTransformer(ID_NULL_TRNSFMR, ACTIVE_TRUE_TRNSFMR)
+        .skipTransformationForField(ACCOUNT_MODIFIED_AT, ACCOUNT_CREATED_AT)
+        .setDefaultValueForMissingField(false)
+        .setDefaultValueForMissingPrimitiveField(false)
+        .transform(dto, entityType);
+  }
 
   /**
    * Get all Deposit Accounts
@@ -55,7 +51,11 @@ public class InvestmentService {
     log.info("Fetching all Active Deposit Accounts");
     return depositAccountRepository
         .findByActive(Boolean.TRUE)
-        .map(da -> entityToDto.transform(da, AccountDto.class));
+        .map(da -> entityToDto(da, AccountDto.class));
+  }
+
+  private <T> T entityToDto(Object entity, Class<T> dtoType) {
+    return BeanUtils.getTransformer(dtoType).apply(entity);
   }
 
   /**
@@ -67,8 +67,8 @@ public class InvestmentService {
   public Mono<AccountDto> addDepositAccount(final AccountDto depositAccount) {
     log.info("Add a Deposit Account");
     return depositAccountRepository
-        .save(dtoToEntitySkipId.transform(depositAccount, DepositAccount.class))
-        .map(da -> entityToDto.transform(da, AccountDto.class));
+        .save(dtoToEntitySkipId(depositAccount, DepositAccount.class))
+        .map(da -> entityToDto(da, AccountDto.class));
   }
 
   /**
@@ -80,7 +80,7 @@ public class InvestmentService {
     log.info("Fetching all Active Loan Accounts");
     return loanRepository
         .findByActive(Boolean.TRUE)
-        .map(loan -> entityToDto.transform(loan, AccountDto.class));
+        .map(loan -> entityToDto(loan, AccountDto.class));
   }
 
   /**
@@ -92,8 +92,8 @@ public class InvestmentService {
   public Mono<AccountDto> addLoanAccount(final AccountDto loanAccount) {
     log.info("Add a Loan Account");
     return loanRepository
-        .save(dtoToEntitySkipId.transform(loanAccount, Loan.class))
-        .map(loan -> entityToDto.transform(loan, AccountDto.class));
+        .save(dtoToEntitySkipId(loanAccount, Loan.class))
+        .map(loan -> entityToDto(loan, AccountDto.class));
   }
 
   /**
@@ -105,7 +105,7 @@ public class InvestmentService {
     log.info("Fetching all Active Miscellaneous Accounts");
     return miscellaneousRepository
         .findByActive(Boolean.TRUE)
-        .map(misc -> entityToDto.transform(misc, MiscellaneousDto.class));
+        .map(misc -> entityToDto(misc, MiscellaneousDto.class));
   }
 
   /**
@@ -118,8 +118,8 @@ public class InvestmentService {
       final MiscellaneousDto miscellaneousAccount) {
     log.info("Add a Miscellaneous Account");
     return miscellaneousRepository
-        .save(dtoToEntitySkipId.transform(miscellaneousAccount, Miscellaneous.class))
-        .map(misc -> entityToDto.transform(misc, MiscellaneousDto.class));
+        .save(dtoToEntitySkipId(miscellaneousAccount, Miscellaneous.class))
+        .map(misc -> entityToDto(misc, MiscellaneousDto.class));
   }
 
   /**
@@ -131,20 +131,73 @@ public class InvestmentService {
     log.info("Fetching all Active MutualFunds");
     return mutualFundRepository
         .findByActive(Boolean.TRUE)
-        .map(mf -> entityToDto.transform(mf, MutualFundDto.class));
+        .map(mf -> entityToDto(mf, MutualFundDto.class));
   }
 
   /**
    * Add a Mutual Fund
    *
-   * @param mutualFund the mutual fund dto object
+   * @param mutualFund the mutual fund dto
    * @return {@link Mono<MutualFundDto>}
    */
   public Mono<MutualFundDto> addMutualFund(final MutualFundDto mutualFund) {
     log.info("Add a Mutual Fund");
     return mutualFundRepository
-        .save(dtoToEntitySkipId.transform(mutualFund, MutualFund.class))
-        .map(mf -> entityToDto.transform(mf, MutualFundDto.class));
+        .save(dtoToEntitySkipId(mutualFund, MutualFund.class))
+        .map(mf -> entityToDto(mf, MutualFundDto.class));
+  }
+
+  /**
+   * Get Mutual Funds Buy Transaction
+   *
+   * @param fetchSoldOut if true fetch sold out buy transaction else un sold out transaction
+   * @return {@link Flux<MutualFundBuyTransactionDto>}
+   */
+  public Flux<MutualFundBuyTransactionDto> getMutualFundBuyTransactions(Boolean fetchSoldOut) {
+    log.info("Fetching all Mutual Fund Buy Transaction based on sold out value");
+    return mutualFundBuyTransactionRepository
+        .findByIsSoldOut(fetchSoldOut)
+        .map(mf -> entityToDto(mf, MutualFundBuyTransactionDto.class));
+  }
+
+  /**
+   * Add a Mutual Fund Buy Transactions
+   *
+   * @param mfBuyTransaction the mutual fund buy transaction dto
+   * @return {@link Mono<MutualFundBuyTransactionDto>}
+   */
+  public Mono<MutualFundBuyTransactionDto> addMutualFundBuyTransaction(
+      final MutualFundBuyTransactionDto mfBuyTransaction) {
+    log.info("Add a Mutual Fund Buy Transaction");
+    return mutualFundBuyTransactionRepository
+        .save(dtoToEntitySkipId(mfBuyTransaction, MutualFundBuyTransaction.class))
+        .map(mfBuy -> entityToDto(mfBuy, MutualFundBuyTransactionDto.class));
+  }
+
+  /**
+   * Get Mutual Funds Sell Transactions
+   *
+   * @return {@link Flux<MutualFundSellTransactionDto>}
+   */
+  public Flux<MutualFundSellTransactionDto> getMutualFundSellTransactions() {
+    log.info("Fetching all Mutual Fund Sell Transactions");
+    return mutualFundSellTransactionRepository
+        .findAll()
+        .map(mf -> entityToDto(mf, MutualFundSellTransactionDto.class));
+  }
+
+  /**
+   * Add a Mutual Fund Sell Transaction
+   *
+   * @param mfSellTransaction the mutual fund sell transaction dto
+   * @return {@link Mono<MutualFundSellTransactionDto>}
+   */
+  public Mono<MutualFundSellTransactionDto> addMutualFundSellTransaction(
+      final MutualFundSellTransactionDto mfSellTransaction) {
+    log.info("Add a Mutual Fund Sell Transaction");
+    return mutualFundSellTransactionRepository
+        .save(dtoToEntitySkipId(mfSellTransaction, MutualFundSellTransaction.class))
+        .map(mfSell -> entityToDto(mfSell, MutualFundSellTransactionDto.class));
   }
 
   /**
@@ -156,7 +209,7 @@ public class InvestmentService {
     log.info("Fetching all Active Saving Accounts");
     return savingAccountRepository
         .findByActive(Boolean.TRUE)
-        .map(sa -> entityToDto.transform(sa, AccountDto.class));
+        .map(sa -> entityToDto(sa, AccountDto.class));
   }
 
   /**
@@ -168,8 +221,8 @@ public class InvestmentService {
   public Mono<AccountDto> addSavingAccount(final AccountDto savingAccount) {
     log.info("Add a Saving Account");
     return savingAccountRepository
-        .save(dtoToEntitySkipId.transform(savingAccount, SavingAccount.class))
-        .map(sa -> entityToDto.transform(sa, AccountDto.class));
+        .save(dtoToEntitySkipId(savingAccount, SavingAccount.class))
+        .map(sa -> entityToDto(sa, AccountDto.class));
   }
 
   /**
@@ -181,7 +234,7 @@ public class InvestmentService {
     log.info("Fetching all Active Stocks");
     return stockRepository
         .findByActive(Boolean.TRUE)
-        .map(stock -> entityToDto.transform(stock, StockDto.class));
+        .map(stock -> entityToDto(stock, StockDto.class));
   }
 
   /**
@@ -193,7 +246,7 @@ public class InvestmentService {
   public Mono<StockDto> addStock(final StockDto stock) {
     log.info("Add a Stock");
     return stockRepository
-        .save(dtoToEntitySkipId.transform(stock, Stock.class))
-        .map(sa -> entityToDto.transform(sa, StockDto.class));
+        .save(dtoToEntitySkipId(stock, Stock.class))
+        .map(sa -> entityToDto(sa, StockDto.class));
   }
 }
